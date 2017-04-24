@@ -1,0 +1,66 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/snapshot" }
+}
+
+repositories {
+   flatDir {
+       dirs 'lib'
+   }
+}
+
+dependencies {
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.9.Final'
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.0'
+    compile name: 'json-lib-2.4-jdk15'
+    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+task copySrc(type: Copy){
+    from "src"
+	exclude "main/java"
+	exclude "test"
+    into "$buildDir/libs/src"
+}
+
+task copyCmd(type: Copy) {
+    from "run.bat"
+    into "$buildDir/libs"
+}
+
+task copyConfig(type: Copy) {
+    from "configs"
+    into "$buildDir/libs/configs"
+}
+
+task copyLibs(type: Copy){
+	from configurations.runtime
+    into "$buildDir/libs/lib"
+}
+
+//build đầy đủ
+task fatBuild(type: Copy, dependsOn: ["jar", "copySrc", "copyConfig", "copyCmd", "copyLibs"]) {
+	description 'Build jar, copy web source, config and run bath file'
+}
+
+//build bản nhẹ chỉ có src
+task("litBuild", type: Copy, dependsOn: "copySrc") {
+	description 'Copy web source'
+    from configurations.runtime
+    into "$buildDir/libs/lib"
+}
+
+

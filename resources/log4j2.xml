@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+    <Properties>
+        <Property name="log-path">logs/</Property>
+    </Properties>
+    <Appenders>
+    	 <Console name="console-log" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{ISO8601}] [%t %x] [%c{2}] %m%n"/>
+        </Console>
+        
+        <RollingFile name="trace-log" fileName="${log-path}/trace.log"
+			filePattern="${log-path}/$${date:yyyy-MM-dd}/trace-%d{dd-MM-yyyy}-%i.log" append="true">
+			<PatternLayout>
+				<Pattern>[%d{ISO8601}] [%t %x] %c [%5p] %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+				<SizeBasedTriggeringPolicy size="5 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="1000"/>
+		</RollingFile>
+        
+
+        <RollingFile name="error-log" fileName="${log-path}/error.log"
+			filePattern="${log-path}/$${date:yyyy-MM}/error-%d{dd-MM-yyyy}-%i.log" append="true">
+			<PatternLayout>
+				<Pattern>[%d{ISO8601}] [%t %x] %c [%5p] %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+				<SizeBasedTriggeringPolicy size="5 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="1000"/>
+		</RollingFile>
+    </Appenders>
+    <Loggers>
+        
+        <Logger name="TraceLogger" level="debug" additivity="false">
+            <appender-ref ref="console-log" level="debug"/>
+            <appender-ref ref="trace-log" level="debug"/>
+            <appender-ref ref="error-log" level="error"/>
+        </Logger>
+        
+         <Logger name="ErrorLogger" level="debug" additivity="false">
+            <appender-ref ref="console-log" level="debug"/>
+            <appender-ref ref="error-log" level="error"/>
+        </Logger>
+        
+        <Root level="info" additivity="false">
+            <AppenderRef ref="console-log"/>
+        </Root>
+    </Loggers>
+    
+
+</Configuration>
