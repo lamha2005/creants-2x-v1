@@ -463,14 +463,13 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 			}
 			buffer.position(buffer.position() - 1);
 			IQAntObject CASObj = decodeQAntObject(buffer);
-			QAntDataType type = QAntDataType.QANT_OBJECT;
 			Object finalCASObj = CASObj;
 			// if (CASObj.containsKey(CLASS_MARKER_KEY) &&
 			// CASObj.containsKey(CLASS_FIELDS_KEY)) {
 			// type = CASDataType.CLASS;
 			// finalCASObj = CAS2pojo(CASObj);
 			// }
-			decodedObject = new QAntDataWrapper(type, finalCASObj);
+			decodedObject = new QAntDataWrapper(QAntDataType.QANT_OBJECT, finalCASObj);
 		}
 
 		return decodedObject;

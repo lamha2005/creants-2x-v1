@@ -541,16 +541,24 @@ public class QAntObject implements IQAntObject {
 
 		QAntObject param = new QAntObject();
 		param.putUtfString("_token",
-				"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjIyIiwiZXhwIjoxNDkzNDUwNTQ4LCJpc3MiOiJhdXRoMCIsInR0bCI6ODY0MDAwMDAwfQ.EzdTCrV-jLn9K4WXiWctLuxHDY4A-s_N9zhNB5fiFSA");
+				"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjIyIiwiZXhwIjoxNDkzOTU0NjIzLCJpc3MiOiJhdXRoMCIsInR0bCI6ODY0MDAwMDAwfQ.apUszU4hBtGW6ckxeNZlCycYniwI-AYl4BolpKTXPNQ");
 		object.putQAntObject("p", param);
 
-		byte[] binary = object.toBinary();
+		// byte[] binary = object.toBinary();
+		byte[] binary = new byte[] { 18, 0, 2, 0, 2, 116, 107, 8, 0, -113, 101, 121, 74, 104, 98, 71, 99, 105, 79, 105,
+				74, 73, 85, 122, 73, 49, 78, 105, 74, 57, 46, 101, 121, 74, 112, 90, 67, 73, 54, 73, 106, 73, 121, 73,
+				105, 119, 105, 90, 88, 104, 119, 73, 106, 111, 120, 78, 68, 107, 122, 79, 84, 85, 49, 78, 106, 69, 49,
+				76, 67, 74, 112, 99, 51, 77, 105, 79, 105, 74, 104, 100, 88, 82, 111, 77, 67, 73, 115, 73, 110, 82, 48,
+				98, 67, 73, 54, 79, 68, 89, 48, 77, 68, 65, 119, 77, 68, 65, 119, 102, 81, 46, 52, 112, 105, 111, 78,
+				48, 98, 84, 97, 116, 82, 57, 112, 45, 119, 98, 69, 104, 55, 80, 54, 51, 108, 116, 75, 89, 52, 86, 118,
+				118, 116, 118, 101, 84, 49, 103, 116, 100, 67, 108, 103, 117, 69, 0, 1, 99, 3, 0, 1 };
 		System.out.println(binary.length);
 		System.out.println(Arrays.toString(binary));
 
 		QAntObject decode = QAntObject.newFromBinaryData(binary);
-		IQAntObject qAntObject = decode.getQAntObject("p");
-		System.out.println(qAntObject.getUtfString("_token"));
+		Short short1 = decode.getShort("c");
+//		IQAntObject qAntObject = decode.getQAntObject("p");
+		System.out.println(short1 + "/" + decode.getUtfString("tk"));
 
 	}
 }

@@ -1,19 +1,13 @@
 package com.creants.creants_2x.core.api;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.RandomStringUtils;
 
 import com.creants.creants_2x.QAntServer;
-import com.creants.creants_2x.core.IQAntEventParam;
-import com.creants.creants_2x.core.QAntEvent;
-import com.creants.creants_2x.core.QAntEventParam;
-import com.creants.creants_2x.core.QAntEventType;
 import com.creants.creants_2x.core.api.response.IQAntGameResponseApi;
 import com.creants.creants_2x.core.api.response.QAntGameResponseApi;
 import com.creants.creants_2x.core.controllers.SystemRequest;
@@ -44,19 +38,21 @@ import com.creants.creants_2x.socket.gate.wood.QAntUser;
  *
  */
 public class QAntGameApi implements IQAntGameApi {
-	private static final int GAME_PASSWORD_LEN = 16;
 	protected QAntServer qant;
 	protected IQAntApi qantApi;
 	protected final IQAntGameResponseApi responseApi;
+
 
 	public QAntGameApi() {
 		this(null);
 	}
 
+
 	public QAntGameApi(QAntServer qant) {
 		this.qant = qant;
 		this.responseApi = new QAntGameResponseApi();
 	}
+
 
 	@Override
 	public void setQAnt(QAntServer qant) {
@@ -67,15 +63,18 @@ public class QAntGameApi implements IQAntGameApi {
 		this.qantApi = qant.getAPIManager().getQAntApi();
 	}
 
+
 	@Override
 	public IQAntGameResponseApi getResponseAPI() {
 		return this.responseApi;
 	}
 
+
 	@Override
 	public Room createGame(Zone zone, CreateQAntGameSettings settings, QAntUser owner) throws QAntCreateRoomException {
 		return createGame(zone, settings, owner, true, true);
 	}
+
 
 	@Override
 	public Room createGame(Zone zone, CreateQAntGameSettings settings, QAntUser owner, boolean fireClientEvent,
@@ -111,11 +110,13 @@ public class QAntGameApi implements IQAntGameApi {
 		return theGame;
 	}
 
+
 	@Override
 	public Room quickJoinGame(QAntUser player, MatchExpression expression, Zone zone, String groupId)
 			throws QAntJoinRoomException {
 		return quickJoinGame(player, expression, zone, groupId, null);
 	}
+
 
 	@Override
 	public Room quickJoinGame(QAntUser player, MatchExpression expression, Zone zone, String groupId,
@@ -123,11 +124,13 @@ public class QAntGameApi implements IQAntGameApi {
 		return this.quickJoinGame(player, expression, zone.getRoomListFromGroup(groupId), roomToLeave);
 	}
 
+
 	@Override
 	public Room quickJoinGame(QAntUser player, MatchExpression expression, Collection<Room> searchableRooms,
 			Room roomToLeave) throws QAntJoinRoomException {
 		return quickJoinGame(player, expression, searchableRooms, roomToLeave, false);
 	}
+
 
 	@Override
 	public void sendInvitation(Invitation invitation, InvitationCallback callBackHandler) {
@@ -135,6 +138,7 @@ public class QAntGameApi implements IQAntGameApi {
 		// callBackHandler);
 		responseApi.notifyInivitation(invitation);
 	}
+
 
 	@Override
 	public void sendInvitation(QAntUser inviter, List<QAntUser> invitees, int expirySeconds,
@@ -148,6 +152,7 @@ public class QAntGameApi implements IQAntGameApi {
 			}
 		}
 	}
+
 
 	@Override
 	public void replyToInvitation(QAntUser invitedUser, int invitationId, InvitationResponse reply, IQAntObject params,
@@ -163,16 +168,19 @@ public class QAntGameApi implements IQAntGameApi {
 		}
 	}
 
+
 	@Override
 	public void sendJoinRoomInvitation(Room target, QAntUser inviter, List<QAntUser> invitees, int expirySeconds) {
 		sendJoinRoomInvitation(target, inviter, invitees, expirySeconds, false, false, null);
 	}
+
 
 	@Override
 	public void sendJoinRoomInvitation(Room target, QAntUser inviter, List<QAntUser> invitees, int expirySeconds,
 			boolean asSpect, boolean leaveLastJoinedRoom) {
 		sendJoinRoomInvitation(target, inviter, invitees, expirySeconds, asSpect, leaveLastJoinedRoom, null);
 	}
+
 
 	@Override
 	public void sendJoinRoomInvitation(Room target, QAntUser inviter, List<QAntUser> invitees, int expirySeconds,
@@ -188,6 +196,7 @@ public class QAntGameApi implements IQAntGameApi {
 		// this.sendInvitation(inviter, invitees, expirySeconds, new
 		// JoinRoomInvitationCallback(target), params);
 	}
+
 
 	private Room quickJoinGame(QAntUser player, MatchExpression expression, Collection<Room> searchableRooms,
 			Room roomToLeave, boolean asSpectator) throws QAntJoinRoomException {
@@ -226,6 +235,7 @@ public class QAntGameApi implements IQAntGameApi {
 		throw new QAntQuickJoinGameException(message, errData);
 	}
 
+
 	private void populateInvitations(QAntUser inviter, List<QAntUser> invitedPlayers, int minPlayersToStart,
 			List<QAntRoom> searchableRooms, MatchExpression exp) {
 
@@ -255,17 +265,20 @@ public class QAntGameApi implements IQAntGameApi {
 		}
 	}
 
+
 	private void inviteFriendsInGame(QAntGame theGame, List<QAntUser> friends, boolean leaveLastJoinedRoom,
 			int expiryTime, IQAntObject params) {
 
-		QAntUser owner = theGame.getOwner();
-		if (friends.size() == 0) {
-			Map<IQAntEventParam, Object> evtParams = new HashMap<IQAntEventParam, Object>();
-			evtParams.put(QAntEventParam.ZONE, theGame.getZone());
-			evtParams.put(QAntEventParam.ROOM, theGame);
-			qant.getEventManager().dispatchEvent(new QAntEvent(QAntEventType.GAME_INVITATION_FAILURE, evtParams));
-			return;
-		}
+		// QAntUser owner = theGame.getOwner();
+		// if (friends.size() == 0) {
+		// Map<IQAntEventParam, Object> evtParams = new HashMap<IQAntEventParam,
+		// Object>();
+		// evtParams.put(QAntEventParam.ZONE, theGame.getZone());
+		// evtParams.put(QAntEventParam.ROOM, theGame);
+		// qant.getEventManager().dispatchEvent(new
+		// QAntEvent(QAntEventType.GAME_INVITATION_FAILURE, evtParams));
+		// return;
+		// }
 
 		// InvitationCallback callback = new QAntGameInvitationCallback(theGame,
 		// friends.size(), leaveLastJoinedRoom);
@@ -283,6 +296,7 @@ public class QAntGameApi implements IQAntGameApi {
 		// this.responseApi.notifyInivitation(invitation);
 		// }
 	}
+
 
 	private String generateGamePassword() {
 		return String.valueOf(RandomStringUtils.randomAlphabetic(16)) + System.currentTimeMillis();

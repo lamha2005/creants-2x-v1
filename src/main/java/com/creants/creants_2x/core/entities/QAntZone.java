@@ -10,9 +10,12 @@ import com.creants.creants_2x.core.exception.QAntTooManyRoomsException;
 import com.creants.creants_2x.core.extension.IQAntExtension;
 import com.creants.creants_2x.core.managers.IRoomManager;
 import com.creants.creants_2x.core.managers.IZoneManager;
+import com.creants.creants_2x.core.managers.QAntRoomManager;
 import com.creants.creants_2x.core.setting.CreateRoomSettings;
+import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.gate.wood.QAntUser;
 import com.creants.creants_2x.socket.managers.IUserManager;
+import com.creants.creants_2x.socket.managers.UserManager;
 
 import io.netty.channel.Channel;
 
@@ -22,8 +25,8 @@ import io.netty.channel.Channel;
  */
 public class QAntZone implements Zone {
 	private IZoneManager zoneManager;
-	// private final IRoomManager roomManager;
-	// private final IUserManager userManager;
+	private final IRoomManager roomManager;
+	private final IUserManager userManager;
 	private volatile IQAntExtension extension;
 	private boolean customLogin;
 	private volatile int maxAllowedRooms;
@@ -32,330 +35,382 @@ public class QAntZone implements Zone {
 	private int maxUserIdleTime;
 	private int maxFailedLogins;
 	private final String name;
-
+	private Integer id;
 	private QAntServer qant;
+	private boolean active;
+	private String guestUserNamePrefix;
 
-	public QAntZone() {
-		this.customLogin = false;
+
+	public QAntZone(String name) {
+		this.customLogin = true;
 		this.userReconnectionSeconds = 0;
 		this.maxUserIdleTime = 0;
 		this.maxFailedLogins = 3;
-		this.name = "";
+		this.active = true;
+		this.maxAllowedUsers = Integer.MAX_VALUE;
+		this.maxAllowedRooms = Integer.MAX_VALUE;
+		this.id = null;
+		this.name = name;
 		this.qant = QAntServer.getInstance();
-		// (this.roomManager = new QAntRoomManager()).setOwnerZone(this);
-		// (this.userManager = new QAntUserManager()).setOwnerZone(this);
+		(this.roomManager = new QAntRoomManager()).setOwnerZone(this);
+		(this.userManager = new UserManager()).setOwnerZone(this);
+		this.roomManager.addGroup("default");
 	}
+
+
+	public int getUserReconnectionSeconds() {
+		return userReconnectionSeconds;
+	}
+
+
+	public void setUserReconnectionSeconds(int userReconnectionSeconds) {
+		this.userReconnectionSeconds = userReconnectionSeconds;
+	}
+
+
+	public String getGuestUserNamePrefix() {
+		return guestUserNamePrefix;
+	}
+
 
 	@Override
 	public List<Room> getRoomListFromGroup(String groupId) {
-		// TODO Auto-generated method stub
-		return null;
+		return roomManager.getRoomListFromGroup(groupId);
 	}
+
 
 	@Override
 	public IUserManager getUserManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return userManager;
 	}
+
 
 	@Override
 	public boolean isActive() {
-		// TODO Auto-generated method stub
-		return false;
+		return active;
 	}
+
 
 	@Override
 	public void setActive(boolean active) {
-		// TODO Auto-generated method stub
-
+		this.active = active;
 	}
+
 
 	@Override
 	public void setId(int id) {
-		// TODO Auto-generated method stub
-
+		this.id = id;
 	}
+
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return name;
 	}
+
 
 	@Override
 	public int getId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return id;
 	}
+
 
 	@Override
 	public int getMaxAllowedUsers() {
-		// TODO Auto-generated method stub
-		return 0;
+		return maxAllowedUsers;
 	}
+
 
 	@Override
 	public void setMaxAllowedUsers(int max) {
-		// TODO Auto-generated method stub
-
+		this.maxAllowedUsers = max;
 	}
+
 
 	@Override
 	public int getMaxAllowedRooms() {
-		// TODO Auto-generated method stub
-		return 0;
+		return maxAllowedRooms;
 	}
+
 
 	@Override
 	public void setMaxAllowedRooms(int max) {
-		// TODO Auto-generated method stub
-
+		maxAllowedRooms = max;
 	}
+
 
 	@Override
 	public int getMaxUserIdleTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return maxUserIdleTime;
 	}
+
 
 	@Override
 	public void setMaxUserIdleTime(int max) {
-		// TODO Auto-generated method stub
-
+		maxUserIdleTime = max;
 	}
+
 
 	@Override
 	public boolean isCustomLogin() {
-		// TODO Auto-generated method stub
-		return false;
+		return customLogin;
 	}
+
 
 	@Override
 	public boolean isForceLogout() {
-		// TODO Auto-generated method stub
 		return false;
 	}
+
 
 	@Override
 	public void setForceLogout(boolean value) {
-		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void setCustomLogin(boolean isCustome) {
-		// TODO Auto-generated method stub
-
+		customLogin = isCustome;
 	}
+
 
 	@Override
 	public boolean isGuestUserAllowed() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
+
 
 	@Override
 	public void setGuestUserAllowed(boolean allowGuest) {
-		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public int getUserCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return userManager.getUserCount();
 	}
+
 
 	@Override
 	public int getTotalRoomCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return roomManager.getTotalRoomCount();
 	}
+
 
 	@Override
 	public int getGameRoomCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return roomManager.getGameRoomCount();
 	}
 
-	@Override
-	public Room createRoom(CreateRoomSettings roomSetting) throws QAntCreateRoomException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
-	public Room createRoom(CreateRoomSettings roomSetting, QAntUser owner) throws QAntCreateRoomException {
-		// TODO Auto-generated method stub
-		return null;
+	public Room createRoom(CreateRoomSettings params) throws QAntCreateRoomException {
+		return roomManager.createRoom(params);
 	}
+
+
+	@Override
+	public Room createRoom(CreateRoomSettings params, QAntUser user) throws QAntCreateRoomException {
+		return roomManager.createRoom(params, user);
+	}
+
 
 	@Override
 	public IRoomManager getRoomManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return roomManager;
 	}
+
 
 	@Override
 	public IZoneManager getZoneManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return zoneManager;
 	}
+
 
 	@Override
 	public void setZoneManager(IZoneManager zoneManager) {
-		// TODO Auto-generated method stub
-
+		this.zoneManager = zoneManager;
 	}
+
 
 	@Override
 	public List<Room> getRoomList() {
-		// TODO Auto-generated method stub
-		return null;
+		return roomManager.getRoomList();
 	}
+
 
 	@Override
 	public Room getRoomById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		return roomManager.getRoomById(id);
 	}
+
 
 	@Override
 	public Room getRoomByName(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return roomManager.getRoomByName(name);
 	}
+
 
 	@Override
 	public void addRoom(Room room) throws QAntTooManyRoomsException {
-		// TODO Auto-generated method stub
-
+		roomManager.addRoom(room);
 	}
+
 
 	@Override
 	public void removeRoom(Room room) {
-		// TODO Auto-generated method stub
-
+		roomManager.removeRoom(room);
 	}
+
 
 	@Override
 	public void removeRoom(int id) {
-		// TODO Auto-generated method stub
-
+		roomManager.removeRoom(id);
 	}
+
 
 	@Override
 	public void removeRoom(String name) {
-		// TODO Auto-generated method stub
-
+		roomManager.removeRoom(name);
 	}
+
 
 	@Override
 	public void checkAndRemove(Room room) {
-		// TODO Auto-generated method stub
-
+		roomManager.checkAndRemove(room);
 	}
+
 
 	@Override
 	public void changeRoomName(Room room, String name) throws QAntRoomException {
-		// TODO Auto-generated method stub
-
+		roomManager.changeRoomName(room, name);
 	}
+
 
 	@Override
 	public QAntUser getUserById(int userId) {
-		// TODO Auto-generated method stub
-		return null;
+		return userManager.getUserById(userId);
 	}
+
 
 	@Override
 	public QAntUser getUserByName(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return userManager.getUserByName(name);
 	}
+
 
 	@Override
 	public QAntUser getUserByChannel(Channel channel) {
-		// TODO Auto-generated method stub
-		return null;
+		return userManager.getUserByChannel(channel);
 	}
+
 
 	@Override
 	public Collection<Channel> getChannelList() {
-		// TODO Auto-generated method stub
-		return null;
+		return userManager.getAllChannels();
 	}
+
 
 	@Override
 	public Collection<QAntUser> getUserList() {
-		// TODO Auto-generated method stub
-		return null;
+		return userManager.getAllUsers();
 	}
+
 
 	@Override
 	public void removeAllUsers() {
-		// TODO Auto-generated method stub
-
+		for (QAntUser user : userManager.getAllUsers()) {
+			qant.getAPIManager().getQAntApi().disconnectUser(user);
+		}
 	}
+
 
 	@Override
-	public void removeUser(int id) {
-		// TODO Auto-generated method stub
-
+	public void removeUser(int userId) {
+		QAntUser user = userManager.getUserById(userId);
+		if (user == null) {
+			QAntTracer.info(this.getClass(),
+					"Can't remove user with Id: " + userId + ". User doesn't exist in Zone: " + this.name);
+		} else {
+			removeUser(user);
+		}
 	}
+
 
 	@Override
 	public void removeUser(String name) {
-		// TODO Auto-generated method stub
+		QAntUser user = userManager.getUserByName(name);
+		if (user == null) {
+			QAntTracer.info(this.getClass(),
+					"Can't remove user with name: " + name + ". User doesn't exist in Zone: " + this.name);
+		} else {
+			removeUser(user);
+		}
 
 	}
+
 
 	@Override
 	public void removeUser(Channel channel) {
-		// TODO Auto-generated method stub
+		QAntUser user = userManager.getUserByChannel(channel);
+		if (user == null) {
+			QAntTracer.info(this.getClass(),
+					"Can't remove user with channel: " + channel + ". User doesn't exist in Zone: " + this.name);
+		} else {
+			removeUser(user);
+		}
 
 	}
+
 
 	@Override
 	public void removeUser(QAntUser user) {
-		// TODO Auto-generated method stub
-
+		userManager.disconnectUser(user);
+		roomManager.removeUser(user);
 	}
+
 
 	@Override
 	public void removeUserFromRoom(QAntUser user, Room room) {
-		// TODO Auto-generated method stub
-
+		roomManager.removeUser(user, room);
 	}
+
 
 	@Override
 	public IQAntExtension getExtension() {
-		// TODO Auto-generated method stub
-		return null;
+		return extension;
 	}
+
 
 	@Override
 	public void setExtension(IQAntExtension extension) {
-		// TODO Auto-generated method stub
-
+		this.extension = extension;
 	}
+
 
 	@Override
 	public int getMaxFailedLogins() {
-		// TODO Auto-generated method stub
-		return 0;
+		return maxFailedLogins;
 	}
+
 
 	@Override
 	public void setMaxFailedLogins(int count) {
-		// TODO Auto-generated method stub
-
+		this.setMaxFailedLogins(count);
 	}
+
 
 	@Override
 	public String getDump() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Sorry, not implemented yet!");
+	}
+
+
+	@Override
+	public void setGuestUserNamePrefix(String prefixName) {
+		this.guestUserNamePrefix = prefixName;
 	}
 
 }

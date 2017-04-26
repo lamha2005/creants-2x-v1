@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.creants.creants_2x.core.entities.Zone;
 import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.gate.wood.QAntUser;
 
@@ -23,6 +24,7 @@ public class UserManager implements IUserManager {
 	private final ConcurrentMap<Channel, QAntUser> usersByChannel;
 	private final ConcurrentMap<Integer, QAntUser> usersById;
 	private int highestCCU;
+	private Zone ownerZone;
 
 
 	public UserManager() {
@@ -36,6 +38,16 @@ public class UserManager implements IUserManager {
 
 	public String getName() {
 		return name;
+	}
+
+
+	public Zone getOwnerZone() {
+		return ownerZone;
+	}
+
+
+	public void setOwnerZone(Zone ownerZone) {
+		this.ownerZone = ownerZone;
 	}
 
 

@@ -10,7 +10,9 @@ import com.creants.creants_2x.core.exception.QAntException;
 public interface IServerEventHandler {
 	void handleServerEvent(IQAntEvent event) throws QAntException;
 
-	void setParentExtension(QAntExtension p0);
+
+	void setParentExtension(QAntExtension extension);
+
 
 	QAntExtension getParentExtension();
 }

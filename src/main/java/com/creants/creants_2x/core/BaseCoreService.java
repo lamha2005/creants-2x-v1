@@ -21,13 +21,13 @@ public abstract class BaseCoreService implements ICoreService {
 	}
 
 
-	public void init(final Object o) {
+	public void init(Object o) {
 		this.name = getId();
 		this.active = true;
 	}
 
 
-	public void destroy(final Object o) {
+	public void destroy(Object o) {
 		this.active = false;
 	}
 
@@ -37,12 +37,12 @@ public abstract class BaseCoreService implements ICoreService {
 	}
 
 
-	public void setName(final String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
 
-	public void handleMessage(final Object param) throws Exception {
+	public void handleMessage(Object param) throws Exception {
 		throw new UnsupportedOperationException("This method should be overridden by the child class!");
 	}
 

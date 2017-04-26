@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author LamHM
  *
  */
-public class QAntObjectLite {
+public class QAntObjectLite extends QAntObject {
 	private Map<String, QAntDataWrapper> dataHolder;
 
 

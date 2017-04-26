@@ -1,6 +1,7 @@
 package com.creants.creants_2x.core.config;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,14 +16,46 @@ public class ZoneSettings implements Serializable {
 	public boolean isEncrypted;
 	public int maxUsers;
 	public List<RoomSettings> rooms;
+	private static final transient AtomicInteger idGenerator;
+	private transient Integer id;
+	public String guestUserNamePrefix;
+	public ExtensionSettings extension;
+
+	static {
+		idGenerator = new AtomicInteger(0);
+	}
 
 
 	public ZoneSettings() {
-		name = "";
-		isCustomLogin = true;
-		isEncrypted = false;
-		maxUsers = Integer.MAX_VALUE;
+		this.name = "";
+		this.isCustomLogin = true;
+		this.isEncrypted = false;
+		this.maxUsers = Integer.MAX_VALUE;
+		this.guestUserNamePrefix = "Guest#";
+		this.rooms = new ArrayList<RoomSettings>();
+		this.extension = new ExtensionSettings();
+		this.initId();
 
+	}
+
+
+	public int getId() {
+		return this.id;
+	}
+
+
+	public void setGuestUserNamePrefix(String guestUserNamePrefix) {
+		this.guestUserNamePrefix = guestUserNamePrefix;
+	}
+
+
+	public String getGuestUserNamePrefix() {
+		return guestUserNamePrefix;
+	}
+
+
+	protected synchronized void initId() {
+		this.id = ZoneSettings.idGenerator.getAndIncrement();
 	}
 
 	public static final class RoomSettings implements Serializable {
@@ -69,10 +102,10 @@ public class ZoneSettings implements Serializable {
 
 
 		public int getId() {
-			if (this.id == null) {
-				this.id = getUniqueId();
+			if (id == null) {
+				id = getUniqueId();
 			}
-			return this.id;
+			return id;
 		}
 
 

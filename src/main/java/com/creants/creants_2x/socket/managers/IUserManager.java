@@ -3,6 +3,7 @@ package com.creants.creants_2x.socket.managers;
 import java.util.Collection;
 import java.util.List;
 
+import com.creants.creants_2x.core.entities.Zone;
 import com.creants.creants_2x.socket.gate.wood.QAntUser;
 
 import io.netty.channel.Channel;
@@ -44,6 +45,7 @@ public interface IUserManager {
 
 	void removeUser(int userId);
 
+	void setOwnerZone(Zone zone);
 
 	void removeUser(Channel channel);
 

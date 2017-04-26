@@ -9,10 +9,15 @@ import com.creants.creants_2x.core.IServiceProvider;
 import com.creants.creants_2x.core.QAntEventManager;
 import com.creants.creants_2x.core.ServiceProvider;
 import com.creants.creants_2x.core.api.APIManager;
+import com.creants.creants_2x.core.config.IConfigurator;
+import com.creants.creants_2x.core.config.QAntConfig;
 import com.creants.creants_2x.core.entities.invitation.InvitationManager;
 import com.creants.creants_2x.core.event.handler.SystemHandlerManager;
+import com.creants.creants_2x.core.exception.QAntException;
 import com.creants.creants_2x.core.managers.IExtensionManager;
+import com.creants.creants_2x.core.managers.IZoneManager;
 import com.creants.creants_2x.core.managers.QAntExtensionManager;
+import com.creants.creants_2x.core.managers.QAntZoneManager;
 import com.creants.creants_2x.core.service.IService;
 import com.creants.creants_2x.core.util.AppConfig;
 import com.creants.creants_2x.core.util.QAntTracer;
@@ -55,6 +60,9 @@ public class QAntServer {
 	private IExtensionManager extensionManager;
 	private final IServiceProvider services;
 	private InvitationManager invitationManager;
+	private IZoneManager zoneManager;
+	private IConfigurator qantConfig;
+
 
 	public static QAntServer getInstance() {
 		if (instance == null) {
@@ -64,10 +72,12 @@ public class QAntServer {
 		return instance;
 	}
 
+
 	private QAntServer() {
 		messageHandler = new MessageHandler();
 		services = new ServiceProvider();
 	}
+
 
 	private void start() throws InterruptedException {
 		QAntTracer.debug(this.getClass(), "======================== QUEEN ANT SOCKET =====================");
@@ -133,7 +143,9 @@ public class QAntServer {
 
 	}
 
+
 	private void initialize() {
+		qantConfig = new QAntConfig();
 		messageHandler.init();
 		(apiManager = new APIManager()).init(null);
 		(eventManager = new QAntEventManager()).init(null);
@@ -142,8 +154,15 @@ public class QAntServer {
 		extensionManager = new QAntExtensionManager();
 		invitationManager = getServiceProvider().getInvitationManager();
 		((IService) invitationManager).init((Object) null);
+		try {
+			(zoneManager = new QAntZoneManager()).init(null);
+			zoneManager.initializeZones();
+		} catch (QAntException e) {
+			QAntTracer.error(this.getClass(), "initializeZones fail! ", QAntTracer.getTraceMessage(e));
+		}
 
 	}
+
 
 	private ChannelInitializer<SocketChannel> buildWebsocketChannelInitializer() {
 		return new ChannelInitializer<SocketChannel>() {
@@ -160,6 +179,7 @@ public class QAntServer {
 		};
 	}
 
+
 	private ChannelInitializer<SocketChannel> buildSocketChannelInitializer() {
 		return new ChannelInitializer<SocketChannel>() {
 			@Override
@@ -170,37 +190,56 @@ public class QAntServer {
 		};
 	}
 
+
 	public IUserManager getUserManager() {
 		return userManager;
 	}
+
 
 	public IChannelManager getChannelManager() {
 		return channelManager;
 	}
 
+
 	public SystemHandlerManager getSystemHandlerManager() {
 		return systemHandlerManager;
 	}
+
 
 	public APIManager getAPIManager() {
 		return apiManager;
 	}
 
+
+	public IZoneManager getZoneManager() {
+		return zoneManager;
+	}
+
+
 	public IQAntEventManager getEventManager() {
 		return eventManager;
 	}
+
 
 	public IExtensionManager getExtensionManager() {
 		return extensionManager;
 	}
 
+
 	public IServiceProvider getServiceProvider() {
 		return this.services;
 	}
 
+
+	public IConfigurator getConfigurator() {
+		return qantConfig;
+	}
+
+
 	public InvitationManager getInvitationManager() {
 		return this.invitationManager;
 	}
+
 
 	public static void main(String[] args) throws Exception {
 		System.setProperty("log4j.configurationFile", "resources/log4j2.xml");
