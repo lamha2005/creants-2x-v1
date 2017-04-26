@@ -1,0 +1,14 @@
+{
+	"name":"MuFantasyExtionsion",
+	"isCustomLogin": true,
+	"maxUsers" : 1000000,
+	"isEncrypted" : false,
+	"maxRooms":500,
+	
+	"extension": {
+		"name": "MuFantasyExtension",
+		"type": "Java",
+		"file": "com.creants.muext.MuFantasyExtension",
+		"reloadMode": "AUTO"
+	}
+}

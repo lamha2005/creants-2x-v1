@@ -122,7 +122,8 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		File jarFile = new File("extensions/" + settings.name);
 		try (URLClassLoader extensionClassLoader = new URLClassLoader(new URL[] { jarFile.toURI().toURL() },
 				getClass().getClassLoader())) {
-			Class<?> extensionClass = extensionClassLoader.loadClass(settings.file);
+			String file = settings.file;
+			Class<?> extensionClass = extensionClassLoader.loadClass(file);
 			if (!IQAntExtension.class.isAssignableFrom(extensionClass)) {
 				throw new QAntExtensionException(
 						"Extension does not implement IQAntExtension interface: " + settings.name);
