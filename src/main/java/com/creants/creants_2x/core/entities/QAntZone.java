@@ -80,6 +80,13 @@ public class QAntZone implements Zone {
 
 
 	@Override
+	public void login(QAntUser user) {
+		userManager.addUser(user);
+		qant.getUserManager().addUser(user);
+	}
+
+
+	@Override
 	public IUserManager getUserManager() {
 		return userManager;
 	}

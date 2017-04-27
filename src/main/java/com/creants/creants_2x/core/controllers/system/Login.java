@@ -1,14 +1,20 @@
 package com.creants.creants_2x.core.controllers.system;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.creants.creants_2x.core.IQAntEventParam;
+import com.creants.creants_2x.core.QAntEventParam;
+import com.creants.creants_2x.core.QAntEventSysParam;
+import com.creants.creants_2x.core.QAntEventType;
+import com.creants.creants_2x.core.QAntSystemEvent;
 import com.creants.creants_2x.core.controllers.BaseControllerCommand;
 import com.creants.creants_2x.core.controllers.SystemRequest;
-import com.creants.creants_2x.core.service.WebService;
+import com.creants.creants_2x.core.entities.Zone;
+import com.creants.creants_2x.core.exception.QAntRequestValidationException;
 import com.creants.creants_2x.socket.gate.entities.IQAntObject;
 import com.creants.creants_2x.socket.gate.entities.QAntObject;
 import com.creants.creants_2x.socket.io.IRequest;
-import com.creants.creants_2x.socket.io.Response;
-
-import net.sf.json.JSONObject;
 
 /**
  * @author LamHM
@@ -16,7 +22,7 @@ import net.sf.json.JSONObject;
  */
 public class Login extends BaseControllerCommand {
 	private static final String TOKEN = "tk";
-	private static final byte SYSTEM_CONTROLLER = 0;
+	private static final String ZONE_NAME = "zn";
 
 
 	public Login() {
@@ -28,34 +34,49 @@ public class Login extends BaseControllerCommand {
 	public void execute(IRequest request) throws Exception {
 		IQAntObject params = request.getContent();
 		String token = params.getUtfString(TOKEN);
-		Response response = new Response();
-		response.setTargetController(SYSTEM_CONTROLLER);
-		response.setId(getId());
-		response.setRecipients(request.getSender());
-		
-		String verify = WebService.getInstance().verify(token);
-		JSONObject jo = JSONObject.fromObject(verify);
-		JSONObject userInfo = jo.getJSONObject("data");
-		params = QAntObject.newInstance();
-		params.putUtfString(TOKEN, token);
-		params.putUtfString("fn", userInfo.getString("fullName"));
-		params.putUtfString("avt", userInfo.getString("avatar"));
-		params.putLong("mn", userInfo.getLong("money"));
-		params.putLong("uid", userInfo.getLong("userId"));
-		
-		
-		response.setContent(params);
-		response.write();
+		String zoneName = params.getUtfString(ZONE_NAME);
+		if (zoneName == null)
+			zoneName = "MuFantasy";
+		api.login(request.getSender(), token, zoneName, QAntObject.newInstance());
 	}
 
 
 	@Override
 	public boolean validate(IRequest request) throws Exception {
-		IQAntObject param = request.getContent();
-		if (param == null || !param.containsKey(TOKEN))
+		IQAntObject params = request.getContent();
+		if (params == null || !params.containsKey(TOKEN))
 			return false;
 
-		return true;
+		String zoneName = params.getUtfString(ZONE_NAME);
+		if (zoneName == null)
+			zoneName = "MuFantasy";
+		Zone zone = qant.getZoneManager().getZoneByName(zoneName);
+		return customLogin(params, request, zone);
+	}
+
+
+	protected boolean customLogin(IQAntObject param, IRequest request, Zone zone)
+			throws QAntRequestValidationException {
+
+		boolean res = true;
+		if (zone != null && zone.isCustomLogin()) {
+			if (zone.getExtension() == null) {
+				throw new QAntRequestValidationException(
+						"Custom login is ON but no Extension is active for this zone: " + zone.getName());
+			}
+
+			Map<IQAntEventParam, Object> sysParams = new HashMap<IQAntEventParam, Object>();
+			sysParams.put(QAntEventSysParam.NEXT_COMMAND, Login.class);
+			sysParams.put(QAntEventSysParam.REQUEST_OBJ, request);
+
+			Map<IQAntEventParam, Object> userParams = new HashMap<IQAntEventParam, Object>();
+			userParams.put(QAntEventParam.ZONE, zone);
+			userParams.put(QAntEventParam.SESSION, request.getSender());
+			userParams.put(QAntEventParam.LOGIN_IN_DATA, param.getQAntObject("p"));
+			qant.getEventManager().dispatchEvent(new QAntSystemEvent(QAntEventType.USER_LOGIN, userParams, sysParams));
+			res = false;
+		}
+		return res;
 	}
 
 

@@ -38,7 +38,7 @@ public class ChannelService implements IChannelService {
 
 	public QAntUser connect(long sessionId, Channel channel) {
 		channel.attr(SESSION_ID).set(sessionId);
-		QAntUser user = new QAntUser();
+		QAntUser user = new QAntUser(channel);
 
 		user.setSessionId(sessionId);
 		user.setClientIp(channel.localAddress().toString().substring(1));

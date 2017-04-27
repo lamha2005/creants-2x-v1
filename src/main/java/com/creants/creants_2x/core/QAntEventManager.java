@@ -48,6 +48,7 @@ public class QAntEventManager extends BaseCoreService implements IQAntEventManag
 			listeners = new CopyOnWriteArraySet<IQAntEventListener>();
 			listenersByEvent.put(type, listeners);
 		}
+
 		listeners.add(listener);
 	}
 
@@ -119,8 +120,7 @@ public class QAntEventManager extends BaseCoreService implements IQAntEventManag
 			try {
 				listener.handleServerEvent(event);
 			} catch (Throwable t) {
-				QAntTracer.warn(QAntEventRunner.class,
-						"Error handling event: " + event + " Listener: " + listener);
+				QAntTracer.warn(QAntEventRunner.class, "Error handling event: " + event + " Listener: " + listener);
 			}
 		}
 	}

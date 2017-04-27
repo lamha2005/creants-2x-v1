@@ -10,7 +10,7 @@ repositories {
 
 repositories {
    flatDir {
-       dirs 'lib'
+       dirs 'lib','extensions'
    }
 }
 
@@ -26,6 +26,7 @@ dependencies {
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
     compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.8.3'
+    compile name: 'mu-fantasy-ext'
 }
 
 compileJava.options.encoding = 'UTF-8'

@@ -90,6 +90,7 @@ public abstract class AbstractController implements IController, Runnable {
 				isActive = false;
 				QAntTracer.warn(AbstractController.class, "Controller main loop was interrupted");
 			} catch (Throwable t) {
+				t.printStackTrace();
 				QAntTracer.error(AbstractController.class, "Runable fail!");
 			}
 		}

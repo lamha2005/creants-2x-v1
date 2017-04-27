@@ -44,6 +44,9 @@ public interface Zone {
 	int getMaxAllowedUsers();
 
 
+	void login(QAntUser user);
+
+
 	void setMaxAllowedUsers(int max);
 
 

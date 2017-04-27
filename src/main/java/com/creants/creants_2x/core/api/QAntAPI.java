@@ -25,6 +25,7 @@ import com.creants.creants_2x.core.exception.QAntErrorCode;
 import com.creants.creants_2x.core.exception.QAntErrorData;
 import com.creants.creants_2x.core.exception.QAntJoinRoomException;
 import com.creants.creants_2x.core.exception.QAntRuntimeException;
+import com.creants.creants_2x.core.service.WebService;
 import com.creants.creants_2x.core.setting.CreateRoomSettings;
 import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.gate.entities.IQAntArray;
@@ -36,16 +37,19 @@ import com.creants.creants_2x.socket.io.Response;
 import com.creants.creants_2x.socket.managers.IUserManager;
 
 import io.netty.channel.Channel;
+import net.sf.json.JSONObject;
 
 /**
  * @author LamHa
  *
  */
 public class QAntAPI implements IQAntApi {
+	private static final byte SYSTEM_CONTROLLER = 0;
 	protected final QAntServer qant;
 	protected final IUserManager globalUserManager;
 	protected final IResponseApi responseAPI;
 	private final MatchingUtils matcher;
+
 
 	public QAntAPI(QAntServer qant) {
 		this.qant = qant;
@@ -54,10 +58,12 @@ public class QAntAPI implements IQAntApi {
 		matcher = MatchingUtils.getInstance();
 	}
 
+
 	@Override
 	public IResponseApi getResponseAPI() {
 		return responseAPI;
 	}
+
 
 	@Override
 	public void logout(QAntUser user) {
@@ -91,31 +97,76 @@ public class QAntAPI implements IQAntApi {
 				user.toString(), System.currentTimeMillis() - user.getLoginTime()));
 	}
 
-	@Override
-	public QAntUser login(Channel sender, String token, IQAntObject param) {
-		return login(sender, token, param, false);
-	}
 
 	@Override
-	public QAntUser login(Channel sender, String token, IQAntObject param, boolean forceLogout) {
+	public QAntUser login(Channel sender, String token, String zoneName, IQAntObject param) {
+		return login(sender, token, zoneName, param, false);
+	}
+
+
+	@Override
+	public QAntUser login(Channel sender, String token, String zoneName, IQAntObject params, boolean forceLogout) {
 		if (!qant.getChannelManager().containsChannel(sender)) {
 			QAntTracer.warn(this.getClass(), "Login failed: " + token + " , channel is already expired!");
 			return null;
 		}
 
 		IQAntObject resObj = QAntObject.newInstance();
-		QAntUser user = null;
-		IResponse response = (IResponse) new Response();
+		IResponse response = new Response();
 		response.setId(SystemRequest.Login.getId());
+		response.setTargetController(SYSTEM_CONTROLLER);
 		response.setContent(resObj);
 		response.setRecipients(sender);
+
+		Zone zone = qant.getZoneManager().getZoneByName(zoneName);
+		if (zone == null) {
+			resObj.putShort("ec", QAntErrorCode.LOGIN_BAD_ZONENAME.getId());
+			resObj.putUtfString("ep", zoneName);
+			response.write();
+			QAntTracer.info(this.getClass(),
+					"Bad login request, Zone: " + zoneName + " does not exist. Requested by: " + sender);
+			return null;
+		}
+
+		boolean dc = qant.getUserManager().getUserByChannel(sender) != null;
+		if (dc) {
+			resObj.putShort("ec", QAntErrorCode.LOGIN_ALREADY_LOGGED.getId());
+			response.write();
+			QAntTracer.info(this.getClass(),
+					"Bad login request, Zone: " + zoneName + " does not exist. Requested by: " + sender);
+			return null;
+		}
+
+		QAntUser user = new QAntUser(sender);
+		user.updateLastRequestTime();
+		user.setConnected(true);
+
+		zone.login(user);
+
+		String verify = WebService.getInstance().verify(token);
+		JSONObject jo = JSONObject.fromObject(verify);
+		JSONObject userInfo = jo.getJSONObject("data");
+		resObj.putUtfString("tk", token);
+		resObj.putUtfString("fn", userInfo.getString("fullName"));
+		resObj.putUtfString("avt", userInfo.getString("avatar"));
+		resObj.putLong("mn", userInfo.getLong("money"));
+		resObj.putLong("uid", userInfo.getLong("userId"));
+		response.write();
+
+		Map<IQAntEventParam, Object> evtParams = new HashMap<IQAntEventParam, Object>();
+		evtParams.put(QAntEventParam.ZONE, zone);
+		evtParams.put(QAntEventParam.USER, user);
+		qant.getEventManager().dispatchEvent(new QAntEvent(QAntEventType.USER_JOIN_ZONE, evtParams));
+
 		return user;
 	}
+
 
 	@Override
 	public void kickUser(QAntUser owner, QAntUser kickedUser, String paramString, int paramInt) {
 
 	}
+
 
 	@Override
 	public void disconnectUser(QAntUser user) {
@@ -157,6 +208,7 @@ public class QAntAPI implements IQAntApi {
 
 	}
 
+
 	@Override
 	public void disconnect(Channel channel) {
 		if (channel == null) {
@@ -175,31 +227,37 @@ public class QAntAPI implements IQAntApi {
 
 	}
 
+
 	@Override
 	public QAntUser getUserById(int userId) {
 		return globalUserManager.getUserById(userId);
 	}
+
 
 	@Override
 	public QAntUser getUserByName(String name) {
 		return globalUserManager.getUserByName(name);
 	}
 
+
 	@Override
 	public QAntUser getUserByChannel(Channel channel) {
 		return globalUserManager.getUserByChannel(channel);
 	}
+
 
 	@Override
 	public Room createRoom(Zone zone, CreateRoomSettings roomSetting, QAntUser owner) throws QAntCreateRoomException {
 		return createRoom(zone, roomSetting, owner, false, null, true, true);
 	}
 
+
 	@Override
 	public Room createRoom(Zone zone, CreateRoomSettings roomSetting, QAntUser owner, boolean joinIt, Room roomToLeave)
 			throws QAntCreateRoomException {
 		return createRoom(zone, roomSetting, owner, joinIt, roomToLeave, true, true);
 	}
+
 
 	@Override
 	public Room createRoom(Zone zone, CreateRoomSettings roomSetting, QAntUser owner, boolean joinIt, Room roomToLeave,
@@ -249,10 +307,12 @@ public class QAntAPI implements IQAntApi {
 		return theRoom;
 	}
 
+
 	@Override
 	public void joinRoom(QAntUser user, Room room) throws QAntJoinRoomException {
 		joinRoom(user, room, "", false, user.getLastJoinedRoom());
 	}
+
 
 	@Override
 	public void joinRoom(QAntUser user, Room roomToJoin, String password, boolean asSpectator, Room roomToLeave)
@@ -260,6 +320,7 @@ public class QAntAPI implements IQAntApi {
 
 		joinRoom(user, roomToJoin, password, asSpectator, roomToLeave, true, true);
 	}
+
 
 	@Override
 	public void joinRoom(QAntUser user, Room roomToJoin, String password, boolean asSpectator, Room roomToLeave,
@@ -330,10 +391,12 @@ public class QAntAPI implements IQAntApi {
 		user.setJoining(false);
 	}
 
+
 	@Override
 	public void leaveRoom(QAntUser user, Room room) {
 		leaveRoom(user, room, true, true);
 	}
+
 
 	@Override
 	public void leaveRoom(QAntUser user, Room room, boolean fireClientEvent, boolean fireServerEvent) {
@@ -374,10 +437,12 @@ public class QAntAPI implements IQAntApi {
 		}
 	}
 
+
 	@Override
 	public void removeRoom(Room room) {
 		removeRoom(room, true, true);
 	}
+
 
 	@Override
 	public void removeRoom(Room room, boolean fireClientEvent, boolean fireServerEvent) {
@@ -397,6 +462,7 @@ public class QAntAPI implements IQAntApi {
 			qant.getEventManager().dispatchEvent(new QAntEvent(QAntEventType.ROOM_REMOVED, evtParams));
 		}
 	}
+
 
 	@Override
 	public void sendPublicMessage(Room targetRoom, QAntUser sender, String message, IQAntObject param) {
@@ -428,9 +494,11 @@ public class QAntAPI implements IQAntApi {
 		}
 	}
 
+
 	private List<Channel> getPublicMessageRecipientList(QAntUser sender, Room targetRoom) {
 		return targetRoom.getChannelList();
 	}
+
 
 	@Override
 	public void sendPrivateMessage(QAntUser sender, QAntUser recipient, String message, IQAntObject param) {
@@ -462,6 +530,7 @@ public class QAntAPI implements IQAntApi {
 		messageRecipients.add(sender.getChannel());
 		sendGenericMessage(GenericMessageType.PRIVATE_MSG, sender, -1, message, param, messageRecipients, null);
 	}
+
 
 	/**
 	 * @param type
@@ -502,6 +571,7 @@ public class QAntAPI implements IQAntApi {
 		response.write();
 	}
 
+
 	@Override
 	public void sendExtensionResponse(String cmdName, IQAntObject params, List<QAntUser> recipients, Room room) {
 		final List<Channel> channels = new LinkedList<Channel>();
@@ -512,6 +582,7 @@ public class QAntAPI implements IQAntApi {
 		responseAPI.sendExtResponse(cmdName, params, channels, room);
 	}
 
+
 	@Override
 	public void sendExtensionResponse(String cmdName, IQAntObject params, QAntUser recipient, Room room) {
 		List<Channel> msgRecipients = new LinkedList<Channel>();
@@ -520,10 +591,12 @@ public class QAntAPI implements IQAntApi {
 		responseAPI.sendExtResponse(cmdName, params, msgRecipients, room);
 	}
 
+
 	@Override
 	public List<Room> findRooms(Collection<Room> roomList, MatchExpression expression, int limit) {
 		return matcher.matchRooms(roomList, expression, limit);
 	}
+
 
 	@Override
 	public List<QAntUser> findUsers(Collection<QAntUser> userList, MatchExpression expression, int limit) {

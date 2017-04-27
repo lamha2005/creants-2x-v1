@@ -11,6 +11,7 @@ import com.creants.creants_2x.core.ServiceProvider;
 import com.creants.creants_2x.core.api.APIManager;
 import com.creants.creants_2x.core.config.IConfigurator;
 import com.creants.creants_2x.core.config.QAntConfig;
+import com.creants.creants_2x.core.entities.IDGenerator;
 import com.creants.creants_2x.core.entities.invitation.InvitationManager;
 import com.creants.creants_2x.core.event.handler.SystemHandlerManager;
 import com.creants.creants_2x.core.exception.QAntException;
@@ -21,6 +22,7 @@ import com.creants.creants_2x.core.managers.QAntZoneManager;
 import com.creants.creants_2x.core.service.IService;
 import com.creants.creants_2x.core.util.AppConfig;
 import com.creants.creants_2x.core.util.QAntTracer;
+import com.creants.creants_2x.socket.channels.DefaultChannelManager;
 import com.creants.creants_2x.socket.channels.IChannelManager;
 import com.creants.creants_2x.socket.codec.MessageDecoder;
 import com.creants.creants_2x.socket.codec.MessageEncoder;
@@ -62,6 +64,7 @@ public class QAntServer {
 	private InvitationManager invitationManager;
 	private IZoneManager zoneManager;
 	private IConfigurator qantConfig;
+	private IDGenerator userIDGenerator;
 
 
 	public static QAntServer getInstance() {
@@ -76,6 +79,7 @@ public class QAntServer {
 	private QAntServer() {
 		messageHandler = new MessageHandler();
 		services = new ServiceProvider();
+		userIDGenerator = services.getUIDGenerator();
 	}
 
 
@@ -146,12 +150,12 @@ public class QAntServer {
 
 	private void initialize() {
 		qantConfig = new QAntConfig();
+		channelManager = DefaultChannelManager.getInstance();
 		messageHandler.init();
 		(apiManager = new APIManager()).init(null);
 		(eventManager = new QAntEventManager()).init(null);
 		userManager = new UserManager();
-		eventManager = new QAntEventManager();
-		extensionManager = new QAntExtensionManager();
+		(extensionManager = new QAntExtensionManager()).init();;
 		invitationManager = getServiceProvider().getInvitationManager();
 		((IService) invitationManager).init((Object) null);
 		try {
@@ -238,6 +242,11 @@ public class QAntServer {
 
 	public InvitationManager getInvitationManager() {
 		return this.invitationManager;
+	}
+
+
+	public IDGenerator getUIDGenerator() {
+		return this.userIDGenerator;
 	}
 
 

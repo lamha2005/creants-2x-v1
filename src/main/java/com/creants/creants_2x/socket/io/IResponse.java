@@ -22,6 +22,9 @@ public interface IResponse extends IEngineMessage {
 	void setRecipients(Channel channel);
 
 
+	void setTargetController(Byte controllerId);
+
+
 	boolean isTCP();
 
 

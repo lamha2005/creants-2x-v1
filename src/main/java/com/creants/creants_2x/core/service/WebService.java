@@ -11,7 +11,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class WebService {
 
 	private static final String KEY = "1|WqRVclir6nj4pk3PPxDCzqPTXl3J";
-	private static final String GRAPH_API = "http://192.168.1.28:9393/internal/";
+	private static final String GRAPH_API = "http://192.168.1.22:9393/internal/";
 	private static WebService instance;
 
 

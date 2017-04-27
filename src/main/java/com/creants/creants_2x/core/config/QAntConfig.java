@@ -11,10 +11,13 @@ import com.creants.creants_2x.core.exception.QAntException;
  *
  */
 public class QAntConfig implements IConfigurator {
+	private static final String JAR_EXTENSION = "jar";
+
 
 	public void loadConfiguration() throws Exception {
 
 	}
+
 
 	@Override
 	public List<ZoneSettings> loadZonesConfiguration() throws QAntException {
@@ -23,18 +26,19 @@ public class QAntConfig implements IConfigurator {
 		zone.name = "MuFantasy";
 		settings.add(zone);
 		ZoneSettings.ExtensionSettings extension = new ZoneSettings.ExtensionSettings();
-		extension.name = "MuFantasy.jar";
+		extension.name = "mu-fantasy-ext" + "." + JAR_EXTENSION;
 		extension.file = "com.creants.muext.MuFantasyExtension";
 		extension.type = "JAVA";
 		zone.extension = extension;
 		return settings;
 	}
 
+
 	@Override
 	public void saveServerSettings(boolean saveSetting) throws IOException {
-		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void saveZoneSettings(ZoneSettings setting, boolean saveSetting) throws IOException {
@@ -42,11 +46,13 @@ public class QAntConfig implements IConfigurator {
 
 	}
 
+
 	@Override
 	public void saveZoneSettings(ZoneSettings setting, boolean saveSetting, String name) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public List<ZoneSettings> getZoneSettings() {
@@ -54,11 +60,13 @@ public class QAntConfig implements IConfigurator {
 		return null;
 	}
 
+
 	@Override
 	public ZoneSettings getZoneSetting(String setting) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 	@Override
 	public ZoneSettings getZoneSetting(int id) {
@@ -66,11 +74,13 @@ public class QAntConfig implements IConfigurator {
 		return null;
 	}
 
+
 	@Override
 	public void saveNewZoneSettings(ZoneSettings setting) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void removeZoneSetting(String name) throws IOException {
