@@ -45,7 +45,7 @@ public class SystemController extends AbstractController {
 	public void processRequest(IRequest request) throws Exception {
 		QAntTracer.debug(this.getClass(), "{IN}: " + SystemRequest.fromId(request.getId()).toString());
 		IControllerCommand command = null;
-		short reqId = request.getId();
+		Object reqId = request.getId();
 		command = commandCache.get(reqId);
 		if (command == null) {
 			command = getCommand(reqId);
@@ -55,6 +55,7 @@ public class SystemController extends AbstractController {
 			try {
 				command.execute(request);
 			} catch (Exception re) {
+				re.printStackTrace();
 				String msg = re.getMessage();
 				if (msg != null) {
 					QAntTracer.warn(this.getClass(), msg);
@@ -64,7 +65,7 @@ public class SystemController extends AbstractController {
 	}
 
 
-	private IControllerCommand getCommand(short reqId) {
+	private IControllerCommand getCommand(Object reqId) {
 		IControllerCommand command = null;
 		String className = commandMap.get(reqId);
 		if (className != null) {

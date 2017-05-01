@@ -23,23 +23,24 @@ import com.creants.creants_2x.socket.io.IRequest;
 public class Login extends BaseControllerCommand {
 	private static final String TOKEN = "tk";
 	private static final String ZONE_NAME = "zn";
-
+	private static final String REQUEST_LOGIN_DATA_OUT = "$FS_REQUEST_LOGIN_DATA_OUT";
 
 	public Login() {
 		super(SystemRequest.Login);
 	}
 
-
 	@Override
 	public void execute(IRequest request) throws Exception {
-		IQAntObject params = request.getContent();
-		String token = params.getUtfString(TOKEN);
-		String zoneName = params.getUtfString(ZONE_NAME);
+		System.out.println("************** execute system login");
+		IQAntObject reqObj = request.getContent();
+		String token = reqObj.getUtfString(TOKEN);
+		String zoneName = reqObj.getUtfString(ZONE_NAME);
 		if (zoneName == null)
 			zoneName = "MuFantasy";
-		api.login(request.getSender(), token, zoneName, QAntObject.newInstance());
-	}
 
+		IQAntObject params = (IQAntObject) request.getAttribute(REQUEST_LOGIN_DATA_OUT);
+		api.login(request.getSender(), token, zoneName, params);
+	}
 
 	@Override
 	public boolean validate(IRequest request) throws Exception {
@@ -53,7 +54,6 @@ public class Login extends BaseControllerCommand {
 		Zone zone = qant.getZoneManager().getZoneByName(zoneName);
 		return customLogin(params, request, zone);
 	}
-
 
 	protected boolean customLogin(IQAntObject param, IRequest request, Zone zone)
 			throws QAntRequestValidationException {
@@ -73,12 +73,16 @@ public class Login extends BaseControllerCommand {
 			userParams.put(QAntEventParam.ZONE, zone);
 			userParams.put(QAntEventParam.SESSION, request.getSender());
 			userParams.put(QAntEventParam.LOGIN_IN_DATA, param.getQAntObject("p"));
+
+			IQAntObject paramsOut = QAntObject.newInstance();
+			request.setAttribute(REQUEST_LOGIN_DATA_OUT, paramsOut);
+			userParams.put(QAntEventParam.LOGIN_OUT_DATA, paramsOut);
+
 			qant.getEventManager().dispatchEvent(new QAntSystemEvent(QAntEventType.USER_LOGIN, userParams, sysParams));
 			res = false;
 		}
 		return res;
 	}
-
 
 	@Override
 	public Object preProcess(IRequest request) throws Exception {

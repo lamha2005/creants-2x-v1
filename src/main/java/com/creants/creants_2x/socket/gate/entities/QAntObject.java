@@ -151,7 +151,7 @@ public class QAntObject implements IQAntObject {
 
 
 	@Override
-	public Boolean getBool(final String key) {
+	public Boolean getBool(String key) {
 		final QAntDataWrapper o = dataHolder.get(key);
 		if (o == null) {
 			return null;

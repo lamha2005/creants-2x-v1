@@ -99,8 +99,8 @@ public class QAntAPI implements IQAntApi {
 
 
 	@Override
-	public QAntUser login(Channel sender, String token, String zoneName, IQAntObject param) {
-		return login(sender, token, zoneName, param, false);
+	public QAntUser login(Channel sender, String token, String zoneName, IQAntObject params) {
+		return login(sender, token, zoneName, params, false);
 	}
 
 
@@ -140,6 +140,14 @@ public class QAntAPI implements IQAntApi {
 		QAntUser user = new QAntUser(sender);
 		user.updateLastRequestTime();
 		user.setConnected(true);
+		if(params!= null){
+			String newUserName = params.getUtfString("$FS_NEW_LOGIN_NAME");
+            if (newUserName != null) {
+                user.setName(newUserName);
+            }
+		}
+		
+		
 
 		zone.login(user);
 

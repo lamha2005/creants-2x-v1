@@ -81,6 +81,7 @@ public class QAntZone implements Zone {
 
 	@Override
 	public void login(QAntUser user) {
+		user.setZone(this);
 		userManager.addUser(user);
 		qant.getUserManager().addUser(user);
 	}

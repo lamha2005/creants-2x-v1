@@ -11,7 +11,7 @@ import io.netty.channel.Channel;
 public interface IResponse extends IEngineMessage {
 
 	Byte getTargetController();
-
+	
 
 	Collection<Channel> getRecipients();
 

@@ -151,11 +151,11 @@ public class QAntServer {
 	private void initialize() {
 		qantConfig = new QAntConfig();
 		channelManager = DefaultChannelManager.getInstance();
-		messageHandler.init();
+		userManager = new UserManager();
 		(apiManager = new APIManager()).init(null);
 		(eventManager = new QAntEventManager()).init(null);
-		userManager = new UserManager();
-		(extensionManager = new QAntExtensionManager()).init();;
+		(extensionManager = new QAntExtensionManager()).init();
+		messageHandler.init();
 		invitationManager = getServiceProvider().getInvitationManager();
 		((IService) invitationManager).init((Object) null);
 		try {

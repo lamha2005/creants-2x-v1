@@ -29,7 +29,7 @@ public class ExtensionController extends AbstractController {
 	public void init(Object o) {
 		QAntTracer.info(this.getClass(), "- init ExtensionController");
 		super.init(o);
-		this.extensionManager = qant.getExtensionManager();
+		extensionManager = qant.getExtensionManager();
 	}
 
 	public void destroy(Object o) {
@@ -89,7 +89,7 @@ public class ExtensionController extends AbstractController {
 		}
 
 		long t2 = System.nanoTime();
-		QAntTracer.debug(this.getClass(), "Extension call executed in: " + (t2 - t1) / 1000000.0);
+		QAntTracer.debug(this.getClass(), "Extension call executed in: " + (t2 - t1) / 1000000 + " milisecond");
 	}
 
 }

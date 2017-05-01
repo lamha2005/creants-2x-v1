@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.creants.creants_2x.core.util.IPlayerIdGenerator;
 
-
 /**
  * @author LamHM
  *
@@ -24,7 +23,6 @@ public class CreateRoomSettings {
 	private Class<? extends IPlayerIdGenerator> customPlayerIdGeneratorClass;
 	private Map<Object, Object> roomProperties;
 
-
 	public CreateRoomSettings() {
 		this.name = null;
 		this.groupId = "default";
@@ -36,117 +34,94 @@ public class CreateRoomSettings {
 		this.isHidden = false;
 	}
 
-
 	public String getName() {
 		return this.name;
 	}
-
 
 	public void setName(final String name) {
 		this.name = name;
 	}
 
-
 	public String getGroupId() {
 		return this.groupId;
 	}
-
 
 	public void setGroupId(final String groupId) {
 		this.groupId = groupId;
 	}
 
-
 	public String getPassword() {
 		return this.password;
 	}
-
 
 	public void setPassword(final String password) {
 		this.password = password;
 	}
 
-
 	public int getMaxUsers() {
 		return this.maxUsers;
 	}
-
 
 	public void setMaxUsers(final int maxUsers) {
 		this.maxUsers = maxUsers;
 	}
 
-
 	public int getMaxSpectators() {
 		return this.maxSpectators;
 	}
-
 
 	public void setMaxSpectators(final int maxSpectators) {
 		this.maxSpectators = maxSpectators;
 	}
 
-
 	public boolean isGame() {
 		return this.isGame;
 	}
-
 
 	public void setGame(final boolean isGame) {
 		this.isGame = isGame;
 	}
 
-
 	public boolean isHidden() {
 		return this.isHidden;
 	}
-
 
 	public void setHidden(final boolean isHidden) {
 		this.isHidden = isHidden;
 	}
 
-
 	public RoomExtensionSettings getExtension() {
 		return this.extension;
 	}
-
 
 	public void setExtension(final RoomExtensionSettings extension) {
 		this.extension = extension;
 	}
 
-
 	public int getMaxVariablesAllowed() {
 		return this.maxVariablesAllowed;
 	}
-
 
 	public void setMaxVariablesAllowed(final int maxVariablesAllowed) {
 		this.maxVariablesAllowed = maxVariablesAllowed;
 	}
 
-
 	public Class<? extends IPlayerIdGenerator> getCustomPlayerIdGeneratorClass() {
 		return this.customPlayerIdGeneratorClass;
 	}
-
 
 	public void setCustomPlayerIdGeneratorClass(
 			final Class<? extends IPlayerIdGenerator> customPlayerIdGeneratorClass) {
 		this.customPlayerIdGeneratorClass = customPlayerIdGeneratorClass;
 	}
 
-
 	public Map<Object, Object> getRoomProperties() {
 		return this.roomProperties;
 	}
 
-
 	public void setRoomProperties(final Map<Object, Object> roomProperties) {
 		this.roomProperties = roomProperties;
 	}
-
 
 	@Override
 	public String toString() {
@@ -163,34 +138,39 @@ public class CreateRoomSettings {
 	public static final class RoomExtensionSettings {
 		private String id;
 		private String className;
+		/**
+		 * a properties file containing custom configuration data for your
+		 * extension.
+		 */
 		private String propertiesFile;
 
-
-		public RoomExtensionSettings(final String id, final String className) {
+		/**
+		 * @param id:
+		 *            id của extension extension (chính là tên folder chứa
+		 *            extension)
+		 * @param className:
+		 *            the main extension class file
+		 */
+		public RoomExtensionSettings(String id, String className) {
 			this.id = id;
 			this.className = className;
 		}
-
 
 		public String getId() {
 			return this.id;
 		}
 
-
 		public String getClassName() {
 			return this.className;
 		}
 
-
-		public void setPropertiesFile(final String propertiesFile) {
+		public void setPropertiesFile(String propertiesFile) {
 			this.propertiesFile = propertiesFile;
 		}
-
 
 		public String getPropertiesFile() {
 			return this.propertiesFile;
 		}
-
 
 		@Override
 		public String toString() {
