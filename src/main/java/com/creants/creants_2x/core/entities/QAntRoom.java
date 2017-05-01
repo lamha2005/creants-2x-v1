@@ -450,8 +450,7 @@ public class QAntRoom implements Room {
 
 	@Override
 	public Zone getZone() {
-		// TODO Auto-generated method stub
-		return null;
+		return zone;
 	}
 
 }

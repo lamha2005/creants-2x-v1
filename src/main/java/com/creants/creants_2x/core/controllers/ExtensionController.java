@@ -84,6 +84,7 @@ public class ExtensionController extends AbstractController {
 		try {
 			extension.handleClientRequest(cmd, sender, params);
 		} catch (Exception e) {
+			e.printStackTrace();
 			QAntTracer.error(this.getClass(), "Error while handling client request in extension: "
 					+ extension.toString() + "/" + "Extension Cmd: " + cmd);
 		}

@@ -73,6 +73,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		newRoom.setPassword(params.getPassword());
 		newRoom.setHidden(params.isHidden());
 		newRoom.setMaxUsers(params.getMaxUsers());
+		newRoom.setGame(params.isGame());
 		if (params.isGame()) {
 			newRoom.setMaxSpectators(params.getMaxSpectators());
 		} else {
