@@ -10,7 +10,7 @@ repositories {
 
 repositories {
    flatDir {
-       dirs 'lib','extensions/MuFantasy','extensions/ext_lib'
+       dirs 'lib','extensions/MuFantasy','extensions/_lib_'
    }
 }
 

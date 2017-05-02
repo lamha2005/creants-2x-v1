@@ -15,11 +15,9 @@ public abstract class BaseControllerCommand implements IControllerCommand {
 
 
 	public BaseControllerCommand(SystemRequest request) {
-		System.out.println("*************** DO REQUEST CREATE");
 		qant = QAntServer.getInstance();
 		api = qant.getAPIManager().getQAntApi();
 		id = (short) request.getId();
-		System.out.println("--------------------> " + id);
 	}
 
 

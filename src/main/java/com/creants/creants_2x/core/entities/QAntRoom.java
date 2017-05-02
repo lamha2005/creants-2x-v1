@@ -9,6 +9,8 @@ import com.creants.creants_2x.core.exception.QAntErrorData;
 import com.creants.creants_2x.core.exception.QAntJoinRoomException;
 import com.creants.creants_2x.core.extension.IQAntExtension;
 import com.creants.creants_2x.core.util.IPlayerIdGenerator;
+import com.creants.creants_2x.socket.gate.entities.IQAntArray;
+import com.creants.creants_2x.socket.gate.entities.QAntArray;
 import com.creants.creants_2x.socket.gate.wood.QAntUser;
 import com.creants.creants_2x.socket.managers.IUserManager;
 import com.creants.creants_2x.socket.managers.UserManager;
@@ -41,13 +43,16 @@ public class QAntRoom implements Room {
 		QAntRoom.autoID = new AtomicInteger(0);
 	}
 
+
 	private static int getNewID() {
 		return QAntRoom.autoID.getAndIncrement();
 	}
 
+
 	public QAntRoom(String name) {
 		this(name, null);
 	}
+
 
 	public QAntRoom(String name, Class<?> customPlayerIdGeneratorClass) {
 		this.id = getNewID();
@@ -55,6 +60,7 @@ public class QAntRoom implements Room {
 		this.active = false;
 		this.userManager = new UserManager();
 	}
+
 
 	@Override
 	public String getGroupId() {
@@ -64,10 +70,12 @@ public class QAntRoom implements Room {
 		return "default";
 	}
 
+
 	@Override
 	public void setGroupId(String groupId) {
 		this.groupId = groupId;
 	}
+
 
 	@Override
 	public void setZone(Zone zone) {
@@ -75,23 +83,28 @@ public class QAntRoom implements Room {
 		instantiateRoomIdGenerator();
 	}
 
+
 	private void instantiateRoomIdGenerator() {
 	}
+
 
 	@Override
 	public String getName() {
 		return name;
 	}
 
+
 	@Override
 	public void setName(final String name) {
 		this.name = name;
 	}
 
+
 	@Override
 	public String getPassword() {
 		return password;
 	}
+
 
 	@Override
 	public void setPassword(String password) {
@@ -99,20 +112,24 @@ public class QAntRoom implements Room {
 		passwordProtected = (password != null && password.length() > 0);
 	}
 
+
 	@Override
 	public boolean isPasswordProtected() {
 		return passwordProtected;
 	}
+
 
 	@Override
 	public boolean isPublic() {
 		return !passwordProtected;
 	}
 
+
 	@Override
 	public int getMaxUsers() {
 		return maxUsers;
 	}
+
 
 	@Override
 	public void setMaxUsers(int maxUsers) {
@@ -123,40 +140,48 @@ public class QAntRoom implements Room {
 		// }
 	}
 
+
 	@Override
 	public int getMaxSpectators() {
 		return maxSpectators;
 	}
+
 
 	@Override
 	public void setMaxSpectators(int maxSpectators) {
 		this.maxSpectators = maxSpectators;
 	}
 
+
 	@Override
 	public QAntUser getOwner() {
 		return owner;
 	}
+
 
 	@Override
 	public void setOwner(QAntUser owner) {
 		this.owner = owner;
 	}
 
+
 	@Override
 	public IUserManager getUserManager() {
 		return userManager;
 	}
+
 
 	@Override
 	public void setUserManager(IUserManager userManager) {
 		this.userManager = userManager;
 	}
 
+
 	@Override
 	public boolean isGame() {
 		return game;
 	}
+
 
 	public void setGame(final boolean game, final Class<? extends IPlayerIdGenerator> customPlayerIdGeneratorClass) {
 		this.game = game;
@@ -183,30 +208,36 @@ public class QAntRoom implements Room {
 		}
 	}
 
+
 	@Override
 	public void setGame(boolean game) {
 		this.setGame(game, null);
 	}
+
 
 	@Override
 	public boolean isHidden() {
 		return this.hidden;
 	}
 
+
 	@Override
 	public void setHidden(final boolean hidden) {
 		this.hidden = hidden;
 	}
+
 
 	@Override
 	public boolean isActive() {
 		return this.active;
 	}
 
+
 	@Override
 	public void setActive(final boolean flag) {
 		this.active = flag;
 	}
+
 
 	@Override
 	public List<QAntUser> getPlayersList() {
@@ -218,6 +249,7 @@ public class QAntRoom implements Room {
 		}
 		return playerList;
 	}
+
 
 	@Override
 	public RoomSize getSize() {
@@ -237,6 +269,7 @@ public class QAntRoom implements Room {
 		return new RoomSize(uCount, sCount);
 	}
 
+
 	@Override
 	public List<QAntUser> getSpectatorsList() {
 		final List<QAntUser> specList = new ArrayList<QAntUser>();
@@ -249,20 +282,24 @@ public class QAntRoom implements Room {
 		return specList;
 	}
 
+
 	@Override
 	public QAntUser getUserById(int id) {
 		return userManager.getUserById(id);
 	}
+
 
 	@Override
 	public QAntUser getUserByName(String name) {
 		return userManager.getUserByName(name);
 	}
 
+
 	@Override
 	public QAntUser getUserByChannel(Channel channel) {
 		return userManager.getUserByChannel(channel);
 	}
+
 
 	@Override
 	public QAntUser getUserByPlayerId(int playerId) {
@@ -277,20 +314,24 @@ public class QAntRoom implements Room {
 		return user;
 	}
 
+
 	@Override
 	public List<QAntUser> getUserList() {
 		return userManager.getAllUsers();
 	}
+
 
 	@Override
 	public List<Channel> getChannelList() {
 		return this.userManager.getAllChannels();
 	}
 
+
 	@Override
 	public int getCapacity() {
 		return maxUsers + maxSpectators;
 	}
+
 
 	@Override
 	public void setCapacity(int maxUser, int maxSpectators) {
@@ -298,24 +339,29 @@ public class QAntRoom implements Room {
 		this.maxSpectators = maxSpectators;
 	}
 
+
 	@Override
 	public void destroy() {
 	}
+
 
 	@Override
 	public boolean containsUser(String name) {
 		return userManager.containsName(name);
 	}
 
+
 	@Override
 	public boolean containsUser(QAntUser user) {
 		return userManager.containsUser(user);
 	}
 
+
 	@Override
 	public void addUser(QAntUser user) throws QAntJoinRoomException {
 		addUser(user, false);
 	}
+
 
 	@Override
 	public void addUser(QAntUser user, boolean asSpectator) throws QAntJoinRoomException {
@@ -357,6 +403,7 @@ public class QAntRoom implements Room {
 		}
 	}
 
+
 	@Override
 	public void removeUser(QAntUser user) {
 		if (isGame()) {
@@ -366,10 +413,12 @@ public class QAntRoom implements Room {
 		user.removeJoinedRoom(this);
 	}
 
+
 	@Override
 	public boolean isEmpty() {
 		return userManager.getUserCount() == 0;
 	}
+
 
 	@Override
 	public boolean isFull() {
@@ -379,11 +428,13 @@ public class QAntRoom implements Room {
 		return userManager.getUserCount() == maxUsers;
 	}
 
+
 	@Override
 	public String toString() {
 		return String.format("[ Room: %s, Id: %s, Group: %s, isGame: %s ]", this.name, this.id, this.groupId,
 				this.game);
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -398,15 +449,39 @@ public class QAntRoom implements Room {
 		return isEqual;
 	}
 
+
 	@Override
 	public IQAntExtension getExtension() {
 		return this.extension;
 	}
 
+
 	@Override
 	public void setExtension(IQAntExtension extension) {
 		this.extension = extension;
 	}
+
+
+	@Override
+	public IQAntArray toQAntArray(boolean globalRoomVarsOnly) {
+		RoomSize roomSize = this.getSize();
+		IQAntArray roomObj = QAntArray.newInstance();
+		roomObj.addInt(id);
+		roomObj.addUtfString(name);
+		roomObj.addUtfString(groupId);
+		roomObj.addBool(isGame());
+		roomObj.addBool(isHidden());
+		roomObj.addBool(isPasswordProtected());
+		roomObj.addShort((short) roomSize.getUserCount());
+		roomObj.addShort((short) maxUsers);
+		if (isGame()) {
+			roomObj.addShort((short) roomSize.getSpectatorCount());
+			roomObj.addShort((short) maxSpectators);
+		}
+
+		return roomObj;
+	}
+
 
 	@Override
 	public String getDump() {
@@ -419,34 +494,34 @@ public class QAntRoom implements Room {
 				.append("\tMaxUser: ").append(this.maxUsers).append("\n").append("\tMaxSpect: ")
 				.append(this.maxSpectators).append("\n").append("\tPlayerIdGen: ").append("\tSettings: ").append("\n");
 		if (this.extension != null) {
-			// sb.append("\tExtension: ").append("\n");
-			// sb.append("\t\t").append("Name:
-			// ").append(extension.getName()).append("\n");
-			// sb.append("\t\t").append("Class:
-			// ").append(extension.getExtensionFileName()).append("\n");
-			// sb.append("\t\t").append("Type:
-			// ").append(extension.getType()).append("\n");
-			// sb.append("\t\t").append("Props:
-			// ").append(extension.getPropertiesFileName()).append("\n");
+			sb.append("\tExtension: ").append("\n");
+			sb.append("\t\t").append("Name:").append(extension.getName()).append("\n");
+			sb.append("\t\t").append("Class: ").append(extension.getExtensionFileName()).append("\n");
+			sb.append("\t\t").append("Type: ").append(extension.getType()).append("\n");
+			sb.append("\t\t").append("Props: ").append(extension.getPropertiesFileName()).append("\n");
 		}
 		sb.append("/////////////// End Dump /////////////////").append("\n");
 		return sb.toString();
 	}
+
 
 	@Override
 	public int getId() {
 		return id;
 	}
 
+
 	@Override
 	public int getMaxRoomVariablesAllowed() {
 		return maxRoomVariablesAllowed;
 	}
 
+
 	@Override
 	public void setMaxRoomVariablesAllowed(int max) {
 		this.maxRoomVariablesAllowed = max;
 	}
+
 
 	@Override
 	public Zone getZone() {

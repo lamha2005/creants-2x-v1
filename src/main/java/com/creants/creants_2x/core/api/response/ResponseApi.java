@@ -7,6 +7,7 @@ import com.creants.creants_2x.core.controllers.SystemRequest;
 import com.creants.creants_2x.core.entities.Room;
 import com.creants.creants_2x.core.exception.QAntErrorData;
 import com.creants.creants_2x.core.exception.QAntException;
+import com.creants.creants_2x.core.setting.DefaultConstants;
 import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.gate.entities.IQAntObject;
 import com.creants.creants_2x.socket.gate.entities.QAntObject;
@@ -54,6 +55,7 @@ public class ResponseApi implements IResponseApi {
 	public void notifyJoinRoomSuccess(QAntUser recipient, Room joinedRoom) {
 		IQAntObject resObj = QAntObject.newInstance();
 		IResponse response = (IResponse) new Response();
+		response.setTargetController(DefaultConstants.CORE_SYSTEM_CONTROLLER_ID);
 		response.setId((short) SystemRequest.JoinRoom.getId());
 		response.setContent(resObj);
 		response.setRecipients(recipient.getChannel());

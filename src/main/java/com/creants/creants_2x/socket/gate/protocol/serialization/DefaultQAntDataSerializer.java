@@ -75,11 +75,11 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		ByteBuffer buffer = ByteBuffer.allocate(data.length);
 		buffer.put(data);
 		buffer.flip();
-		return decodeCASArray(buffer);
+		return decodeQAntArray(buffer);
 	}
 
 
-	private IQAntArray decodeCASArray(ByteBuffer buffer) {
+	private IQAntArray decodeQAntArray(ByteBuffer buffer) {
 		IQAntArray casArray = QAntArray.newInstance();
 		byte headerBuffer = buffer.get();
 		if (headerBuffer != QAntDataType.QANT_ARRAY.getTypeID()) {
@@ -456,7 +456,7 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 			decodedObject = binDecode_UTF_STRING_ARRAY(buffer);
 		} else if (headerByte == QAntDataType.QANT_ARRAY.getTypeID()) {
 			buffer.position(buffer.position() - 1);
-			decodedObject = new QAntDataWrapper(QAntDataType.QANT_ARRAY, decodeCASArray(buffer));
+			decodedObject = new QAntDataWrapper(QAntDataType.QANT_ARRAY, decodeQAntArray(buffer));
 		} else {
 			if (headerByte != QAntDataType.QANT_OBJECT.getTypeID()) {
 				throw new QAntCodecException("Unknow CASDataType ID: " + headerByte);
