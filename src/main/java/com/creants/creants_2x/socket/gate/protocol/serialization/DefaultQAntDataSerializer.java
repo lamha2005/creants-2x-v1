@@ -80,7 +80,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 
 
 	private IQAntArray decodeQAntArray(ByteBuffer buffer) {
-		IQAntArray casArray = QAntArray.newInstance();
 		byte headerBuffer = buffer.get();
 		if (headerBuffer != QAntDataType.QANT_ARRAY.getTypeID()) {
 			throw new IllegalStateException("Invalid CASDataType. Expected: " + QAntDataType.QANT_ARRAY.getTypeID()
@@ -91,18 +90,21 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		if (size < 0) {
 			throw new IllegalStateException("Can't decode CASArray. Size is negative = " + size);
 		}
+
+		IQAntArray qAntArray = QAntArray.newInstance();
+		
 		try {
 			for (int i = 0; i < size; ++i) {
 				QAntDataWrapper decodedObject = decodeObject(buffer);
 				if (decodedObject == null) {
 					throw new IllegalStateException("Could not decode CASArray item at index: " + i);
 				}
-				casArray.add(decodedObject);
+				qAntArray.add(decodedObject);
 			}
 		} catch (Exception codecError) {
 			throw new IllegalArgumentException(codecError.getMessage());
 		}
-		return casArray;
+		return qAntArray;
 	}
 
 
