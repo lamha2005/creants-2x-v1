@@ -382,9 +382,9 @@ QANT2X.QAntDataSerializer = {
     },
 
     arr2bin: function (qAntArrayObject, dataStream) {
-        for (var i = 0; qAntArrayObject.size(); i++) {
-            var wrapper = qAntArrayObject[i];
-            dataStream = this.encodeObject(dataStream, wrapper.getType(), wrapper.getObject());
+        for (var i = 0; i < qAntArrayObject.size(); i++) {
+            var wrapper = qAntArrayObject.get(i);
+            this.encodeObject(dataStream, wrapper.getType(), wrapper.getObject());
         }
 
         return dataStream.getBytes();
@@ -467,8 +467,12 @@ QAntArrayObject.prototype.size = function () {
     return this.dataHolder.length;
 }
 
-QAntArrayObject.prototype.add = function(wrappedObject){
+QAntArrayObject.prototype.add = function (wrappedObject) {
     this.dataHolder.push(wrappedObject);
+}
+
+QAntArrayObject.prototype.get = function (index) {
+    return this.dataHolder[index];
 }
 
 QAntArrayObject.prototype.addQAntObject = function (value) {
@@ -483,7 +487,7 @@ QAntArrayObject.prototype.dump = function () {
     var buffer = new StringBuilder();
     buffer.append('{');
     var objDump;
-    for(var i =0 ; i < this.size(); i++){
+    for (var i = 0; i < this.size(); i++) {
         var wrappedObject = this.dataHolder[i];
         if (wrappedObject.getType() == QANT2X.DataType.QANT_OBJECT) {
             objDump = wrappedObject.getObject().dump();
@@ -554,6 +558,10 @@ QAntObject.prototype.putObj = function (key, value, dataType) {
         this.dataHolder[key] = new QAntDataWrapper(dataType, value);
     }
 
+}
+
+QAntObject.prototype.putQAntArray = function (key, value) {
+    this.putObj(key, value, QANT2X.DataType.QANT_ARRAY);
 }
 
 QAntObject.newFromBinaryData = function (bytes) {
