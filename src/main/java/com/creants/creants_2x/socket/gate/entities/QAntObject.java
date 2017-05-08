@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.creants.creants_2x.socket.gate.protocol.serialization.DefaultQAntDataSerializer;
 import com.creants.creants_2x.socket.gate.protocol.serialization.DefaultObjectDumpFormatter;
+import com.creants.creants_2x.socket.gate.protocol.serialization.DefaultQAntDataSerializer;
 import com.creants.creants_2x.socket.gate.protocol.serialization.IQAntDataSerializer;
 import com.creants.creants_2x.socket.util.ByteUtils;
 
@@ -29,6 +29,10 @@ public class QAntObject implements IQAntObject {
 	private IQAntDataSerializer serializer;
 
 
+	public static QAntObject newFromObject(Object o){
+		return (QAntObject) DefaultQAntDataSerializer.getInstance().pojo2qant(o);
+	}
+	
 	public static QAntObject newFromBinaryData(byte[] bytes) {
 		return (QAntObject) DefaultQAntDataSerializer.getInstance().binary2object(bytes);
 	}

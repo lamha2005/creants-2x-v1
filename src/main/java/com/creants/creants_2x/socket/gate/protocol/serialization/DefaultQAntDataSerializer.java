@@ -3,6 +3,9 @@ package com.creants.creants_2x.socket.gate.protocol.serialization;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.ResultSet;
@@ -16,15 +19,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.creants.creants_2x.core.exception.QAntRuntimeException;
+import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.exception.QAntCodecException;
+import com.creants.creants_2x.socket.gate.entities.IQAntArray;
+import com.creants.creants_2x.socket.gate.entities.IQAntObject;
 import com.creants.creants_2x.socket.gate.entities.QAntArray;
 import com.creants.creants_2x.socket.gate.entities.QAntArrayLite;
 import com.creants.creants_2x.socket.gate.entities.QAntDataType;
 import com.creants.creants_2x.socket.gate.entities.QAntDataWrapper;
 import com.creants.creants_2x.socket.gate.entities.QAntObject;
 import com.creants.creants_2x.socket.gate.entities.QAntObjectLite;
-import com.creants.creants_2x.socket.gate.entities.IQAntArray;
-import com.creants.creants_2x.socket.gate.entities.IQAntObject;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -40,31 +47,27 @@ import net.sf.json.JSONObject;
 public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 	private static DefaultQAntDataSerializer instance;
 	private static final int BUFFER_CHUNK_SIZE = 512;
+	private static final String CLASS_MARKER_KEY = "$C";
 
 	static {
 		DefaultQAntDataSerializer.instance = new DefaultQAntDataSerializer();
 	}
 
-
 	public static DefaultQAntDataSerializer getInstance() {
 		return DefaultQAntDataSerializer.instance;
 	}
 
-
 	private DefaultQAntDataSerializer() {
 	}
-
 
 	public int getUnsignedByte(byte b) {
 		return 0xFF & b;
 	}
 
-
 	@Override
 	public String array2json(List<Object> array) {
 		return JSONArray.fromObject((Object) array).toString();
 	}
-
 
 	@Override
 	public IQAntArray binary2array(byte[] data) {
@@ -77,7 +80,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		buffer.flip();
 		return decodeQAntArray(buffer);
 	}
-
 
 	private IQAntArray decodeQAntArray(ByteBuffer buffer) {
 		byte headerBuffer = buffer.get();
@@ -92,7 +94,7 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 
 		IQAntArray qAntArray = QAntArray.newInstance();
-		
+
 		try {
 			for (int i = 0; i < size; ++i) {
 				QAntDataWrapper decodedObject = decodeObject(buffer);
@@ -107,7 +109,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return qAntArray;
 	}
 
-
 	@Override
 	public IQAntObject binary2object(byte[] data) {
 		if (data.length < 3) {
@@ -119,7 +120,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		buffer.flip();
 		return decodeQAntObject(buffer);
 	}
-
 
 	private IQAntObject decodeQAntObject(ByteBuffer buffer) {
 		IQAntObject qAntObject = QAntObject.newInstance();
@@ -153,7 +153,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return qAntObject;
 	}
 
-
 	@Override
 	public IQAntArray json2array(String jsonStr) {
 		if (jsonStr.length() < 2) {
@@ -163,7 +162,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		JSONArray jsa = JSONArray.fromObject((Object) jsonStr);
 		return decodeCASArray(jsa);
 	}
-
 
 	private IQAntArray decodeCASArray(JSONArray jsa) {
 		IQAntArray casArray = (IQAntArray) QAntArrayLite.newInstance();
@@ -177,7 +175,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return casArray;
 	}
 
-
 	@Override
 	public IQAntObject json2object(String jsonStr) {
 		if (jsonStr.length() < 2) {
@@ -188,7 +185,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		JSONObject jso = JSONObject.fromObject((Object) jsonStr);
 		return decodeCASObject(jso);
 	}
-
 
 	private IQAntObject decodeCASObject(JSONObject jso) {
 		IQAntObject CASObject = (IQAntObject) QAntObjectLite.newInstance();
@@ -202,7 +198,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 		return CASObject;
 	}
-
 
 	private QAntDataWrapper decodeJsonObject(Object o) {
 		if (o instanceof Integer) {
@@ -243,7 +238,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 						(o == null) ? "null" : o.getClass()));
 
 	}
-
 
 	@Override
 	public QAntObject resultSet2object(ResultSet rset) throws SQLException {
@@ -292,7 +286,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return CASo;
 	}
 
-
 	private byte[] getBlobData(String colName, InputStream stream) {
 		BufferedInputStream bis = new BufferedInputStream(stream);
 		byte[] bytes = null;
@@ -310,7 +303,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return bytes;
 	}
 
-
 	@Override
 	public QAntArray resultSet2array(ResultSet rset) throws SQLException {
 		QAntArray CASa = new QAntArray();
@@ -320,7 +312,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return CASa;
 	}
 
-
 	@Override
 	public byte[] object2binary(IQAntObject object) {
 		ByteBuffer buffer = ByteBuffer.allocate(DefaultQAntDataSerializer.BUFFER_CHUNK_SIZE);
@@ -328,7 +319,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		buffer.putShort((short) object.size());
 		return obj2bin(object, buffer);
 	}
-
 
 	private byte[] obj2bin(IQAntObject object, ByteBuffer buffer) {
 		Set<String> keys = object.getKeys();
@@ -345,7 +335,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return result;
 	}
 
-
 	@Override
 	public byte[] array2binary(IQAntArray array) {
 		ByteBuffer buffer = ByteBuffer.allocate(DefaultQAntDataSerializer.BUFFER_CHUNK_SIZE);
@@ -353,7 +342,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		buffer.putShort((short) array.size());
 		return arr2bin(array, buffer);
 	}
-
 
 	private byte[] arr2bin(IQAntArray array, ByteBuffer buffer) {
 		Iterator<QAntDataWrapper> iter = array.iterator();
@@ -369,12 +357,10 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return result;
 	}
 
-
 	@Override
 	public String object2json(Map<String, Object> map) {
 		return JSONObject.fromObject((Object) map).toString();
 	}
-
 
 	public void flattenObject(Map<String, Object> map, QAntObject casObj) {
 		for (Iterator<Map.Entry<String, QAntDataWrapper>> it = casObj.iterator(); it.hasNext();) {
@@ -398,9 +384,8 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 	}
 
-
-	public void flattenArray(List<Object> array, QAntArray casArray) {
-		for (Iterator<QAntDataWrapper> it = casArray.iterator(); it.hasNext();) {
+	public void flattenArray(List<Object> array, QAntArray qantArray) {
+		for (Iterator<QAntDataWrapper> it = qantArray.iterator(); it.hasNext();) {
 			QAntDataWrapper value = (QAntDataWrapper) it.next();
 			if (value.getTypeId() == QAntDataType.QANT_OBJECT) {
 				Map<String, Object> newMap = new HashMap<String, Object>();
@@ -415,7 +400,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 			}
 		}
 	}
-
 
 	private QAntDataWrapper decodeObject(ByteBuffer buffer) throws QAntCodecException {
 		QAntDataWrapper decodedObject = null;
@@ -477,102 +461,99 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return decodedObject;
 	}
 
-
 	@SuppressWarnings("unchecked")
 	private ByteBuffer encodeObject(ByteBuffer buffer, QAntDataType typeId, Object object) {
 		switch (typeId) {
-			case NULL: {
-				buffer = binEncode_NULL(buffer);
-				break;
-			}
-			case BOOL: {
-				buffer = binEncode_BOOL(buffer, (Boolean) object);
-				break;
-			}
-			case BYTE: {
-				buffer = binEncode_BYTE(buffer, (Byte) object);
-				break;
-			}
-			case SHORT: {
-				buffer = binEncode_SHORT(buffer, (Short) object);
-				break;
-			}
-			case INT: {
-				buffer = binEncode_INT(buffer, (Integer) object);
-				break;
-			}
-			case LONG: {
-				buffer = binEncode_LONG(buffer, (Long) object);
-				break;
-			}
-			case FLOAT: {
-				buffer = binEncode_FLOAT(buffer, (Float) object);
-				break;
-			}
-			case DOUBLE: {
-				buffer = binEncode_DOUBLE(buffer, (Double) object);
-				break;
-			}
-			case UTF_STRING: {
-				buffer = binEncode_UTF_STRING(buffer, (String) object);
-				break;
-			}
-			case TEXT: {
-				buffer = binEncode_TEXT(buffer, (String) object);
-				break;
-			}
-			case BOOL_ARRAY: {
-				buffer = binEncode_BOOL_ARRAY(buffer, (Collection<Boolean>) object);
-				break;
-			}
-			case BYTE_ARRAY: {
-				buffer = binEncode_BYTE_ARRAY(buffer, (byte[]) object);
-				break;
-			}
-			case SHORT_ARRAY: {
-				buffer = binEncode_SHORT_ARRAY(buffer, (Collection<Short>) object);
-				break;
-			}
-			case INT_ARRAY: {
-				buffer = binEncode_INT_ARRAY(buffer, (Collection<Integer>) object);
-				break;
-			}
-			case LONG_ARRAY: {
-				buffer = binEncode_LONG_ARRAY(buffer, (Collection<Long>) object);
-				break;
-			}
-			case FLOAT_ARRAY: {
-				buffer = binEncode_FLOAT_ARRAY(buffer, (Collection<Float>) object);
-				break;
-			}
-			case DOUBLE_ARRAY: {
-				buffer = binEncode_DOUBLE_ARRAY(buffer, (Collection<Double>) object);
-				break;
-			}
-			case UTF_STRING_ARRAY: {
-				buffer = binEncode_UTF_STRING_ARRAY(buffer, (Collection<String>) object);
-				break;
-			}
-			case QANT_ARRAY: {
-				buffer = addData(buffer, array2binary((IQAntArray) object));
-				break;
-			}
-			case QANT_OBJECT: {
-				buffer = addData(buffer, object2binary((IQAntObject) object));
-				break;
-			}
-			default: {
-				throw new IllegalArgumentException("Unrecognized type in CASObject serialization: " + typeId);
-			}
+		case NULL: {
+			buffer = binEncode_NULL(buffer);
+			break;
+		}
+		case BOOL: {
+			buffer = binEncode_BOOL(buffer, (Boolean) object);
+			break;
+		}
+		case BYTE: {
+			buffer = binEncode_BYTE(buffer, (Byte) object);
+			break;
+		}
+		case SHORT: {
+			buffer = binEncode_SHORT(buffer, (Short) object);
+			break;
+		}
+		case INT: {
+			buffer = binEncode_INT(buffer, (Integer) object);
+			break;
+		}
+		case LONG: {
+			buffer = binEncode_LONG(buffer, (Long) object);
+			break;
+		}
+		case FLOAT: {
+			buffer = binEncode_FLOAT(buffer, (Float) object);
+			break;
+		}
+		case DOUBLE: {
+			buffer = binEncode_DOUBLE(buffer, (Double) object);
+			break;
+		}
+		case UTF_STRING: {
+			buffer = binEncode_UTF_STRING(buffer, (String) object);
+			break;
+		}
+		case TEXT: {
+			buffer = binEncode_TEXT(buffer, (String) object);
+			break;
+		}
+		case BOOL_ARRAY: {
+			buffer = binEncode_BOOL_ARRAY(buffer, (Collection<Boolean>) object);
+			break;
+		}
+		case BYTE_ARRAY: {
+			buffer = binEncode_BYTE_ARRAY(buffer, (byte[]) object);
+			break;
+		}
+		case SHORT_ARRAY: {
+			buffer = binEncode_SHORT_ARRAY(buffer, (Collection<Short>) object);
+			break;
+		}
+		case INT_ARRAY: {
+			buffer = binEncode_INT_ARRAY(buffer, (Collection<Integer>) object);
+			break;
+		}
+		case LONG_ARRAY: {
+			buffer = binEncode_LONG_ARRAY(buffer, (Collection<Long>) object);
+			break;
+		}
+		case FLOAT_ARRAY: {
+			buffer = binEncode_FLOAT_ARRAY(buffer, (Collection<Float>) object);
+			break;
+		}
+		case DOUBLE_ARRAY: {
+			buffer = binEncode_DOUBLE_ARRAY(buffer, (Collection<Double>) object);
+			break;
+		}
+		case UTF_STRING_ARRAY: {
+			buffer = binEncode_UTF_STRING_ARRAY(buffer, (Collection<String>) object);
+			break;
+		}
+		case QANT_ARRAY: {
+			buffer = addData(buffer, array2binary((IQAntArray) object));
+			break;
+		}
+		case QANT_OBJECT: {
+			buffer = addData(buffer, object2binary((IQAntObject) object));
+			break;
+		}
+		default: {
+			throw new IllegalArgumentException("Unrecognized type in CASObject serialization: " + typeId);
+		}
 		}
 		return buffer;
 	}
 
-
 	private QAntDataWrapper binDecode_NULL(ByteBuffer buffer) {
 		return new QAntDataWrapper(QAntDataType.NULL, null);
 	}
-
 
 	private QAntDataWrapper binDecode_BOOL(ByteBuffer buffer) throws QAntCodecException {
 		byte boolByte = buffer.get();
@@ -588,42 +569,35 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.BOOL, bool);
 	}
 
-
 	private QAntDataWrapper binDecode_BYTE(ByteBuffer buffer) {
 		byte boolByte = buffer.get();
 		return new QAntDataWrapper(QAntDataType.BYTE, boolByte);
 	}
-
 
 	private QAntDataWrapper binDecode_SHORT(ByteBuffer buffer) {
 		short shortValue = buffer.getShort();
 		return new QAntDataWrapper(QAntDataType.SHORT, shortValue);
 	}
 
-
 	private QAntDataWrapper binDecode_INT(ByteBuffer buffer) {
 		int intValue = buffer.getInt();
 		return new QAntDataWrapper(QAntDataType.INT, intValue);
 	}
-
 
 	private QAntDataWrapper binDecode_LONG(ByteBuffer buffer) {
 		long longValue = buffer.getLong();
 		return new QAntDataWrapper(QAntDataType.LONG, longValue);
 	}
 
-
 	private QAntDataWrapper binDecode_FLOAT(ByteBuffer buffer) {
 		float floatValue = buffer.getFloat();
 		return new QAntDataWrapper(QAntDataType.FLOAT, floatValue);
 	}
 
-
 	private QAntDataWrapper binDecode_DOUBLE(ByteBuffer buffer) {
 		double doubleValue = buffer.getDouble();
 		return new QAntDataWrapper(QAntDataType.DOUBLE, doubleValue);
 	}
-
 
 	private QAntDataWrapper binDecode_UTF_STRING(ByteBuffer buffer) throws QAntCodecException {
 		short strLen = buffer.getShort();
@@ -636,7 +610,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.UTF_STRING, decodedString);
 	}
 
-
 	private QAntDataWrapper binDecode_TEXT(ByteBuffer buffer) throws QAntCodecException {
 		int strLen = buffer.getInt();
 		if (strLen < 0) {
@@ -647,7 +620,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		String decodedString = new String(strData);
 		return new QAntDataWrapper(QAntDataType.TEXT, decodedString);
 	}
-
 
 	private QAntDataWrapper binDecode_BOOL_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
@@ -666,7 +638,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.BOOL_ARRAY, array);
 	}
 
-
 	private QAntDataWrapper binDecode_BYTE_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		int arraySize = buffer.getInt();
 		if (arraySize < 0) {
@@ -677,7 +648,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.BYTE_ARRAY, byteData);
 	}
 
-
 	private QAntDataWrapper binDecode_SHORT_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
 		List<Short> array = new ArrayList<Short>();
@@ -687,7 +657,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 		return new QAntDataWrapper(QAntDataType.SHORT_ARRAY, array);
 	}
-
 
 	private QAntDataWrapper binDecode_INT_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
@@ -700,7 +669,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.INT_ARRAY, array);
 	}
 
-
 	private QAntDataWrapper binDecode_LONG_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
 		List<Long> array = new ArrayList<Long>();
@@ -710,7 +678,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 		return new QAntDataWrapper(QAntDataType.LONG_ARRAY, array);
 	}
-
 
 	private QAntDataWrapper binDecode_FLOAT_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
@@ -722,7 +689,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.FLOAT_ARRAY, array);
 	}
 
-
 	private QAntDataWrapper binDecode_DOUBLE_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
 		List<Double> array = new ArrayList<Double>();
@@ -732,7 +698,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 		return new QAntDataWrapper(QAntDataType.DOUBLE_ARRAY, array);
 	}
-
 
 	private QAntDataWrapper binDecode_UTF_STRING_ARRAY(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = getTypeArraySize(buffer);
@@ -750,7 +715,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return new QAntDataWrapper(QAntDataType.UTF_STRING_ARRAY, array);
 	}
 
-
 	private short getTypeArraySize(ByteBuffer buffer) throws QAntCodecException {
 		short arraySize = buffer.getShort();
 		if (arraySize < 0) {
@@ -759,11 +723,9 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return arraySize;
 	}
 
-
 	private ByteBuffer binEncode_NULL(ByteBuffer buffer) {
 		return addData(buffer, new byte[1]);
 	}
-
 
 	private ByteBuffer binEncode_BOOL(ByteBuffer buffer, Boolean value) {
 		if (value == null)
@@ -773,12 +735,10 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, data);
 	}
 
-
 	private ByteBuffer binEncode_BYTE(ByteBuffer buffer, Byte value) {
 		byte[] data = { (byte) QAntDataType.BYTE.getTypeID(), value };
 		return addData(buffer, data);
 	}
-
 
 	private ByteBuffer binEncode_SHORT(ByteBuffer buffer, Short value) {
 		ByteBuffer buf = ByteBuffer.allocate(3);
@@ -787,14 +747,12 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_INT(ByteBuffer buffer, Integer value) {
 		ByteBuffer buf = ByteBuffer.allocate(5);
 		buf.put((byte) QAntDataType.INT.getTypeID());
 		buf.putInt(value);
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer binEncode_LONG(ByteBuffer buffer, Long value) {
 		ByteBuffer buf = ByteBuffer.allocate(9);
@@ -803,7 +761,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_FLOAT(ByteBuffer buffer, Float value) {
 		ByteBuffer buf = ByteBuffer.allocate(5);
 		buf.put((byte) QAntDataType.FLOAT.getTypeID());
@@ -811,14 +768,12 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_DOUBLE(ByteBuffer buffer, Double value) {
 		ByteBuffer buf = ByteBuffer.allocate(9);
 		buf.put((byte) QAntDataType.DOUBLE.getTypeID());
 		buf.putDouble(value);
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer binEncode_UTF_STRING(ByteBuffer buffer, String value) {
 		byte[] stringBytes = value.getBytes();
@@ -829,7 +784,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_TEXT(ByteBuffer buffer, String value) {
 		byte[] stringBytes = value.getBytes();
 		ByteBuffer buf = ByteBuffer.allocate(5 + stringBytes.length);
@@ -838,7 +792,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		buf.put(stringBytes);
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer binEncode_BOOL_ARRAY(ByteBuffer buffer, Collection<Boolean> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + value.size());
@@ -850,7 +803,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_BYTE_ARRAY(ByteBuffer buffer, byte[] value) {
 		ByteBuffer buf = ByteBuffer.allocate(5 + value.length);
 		buf.put((byte) QAntDataType.BYTE_ARRAY.getTypeID());
@@ -858,7 +810,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		buf.put(value);
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer binEncode_SHORT_ARRAY(ByteBuffer buffer, Collection<Short> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 2 * value.size());
@@ -870,7 +821,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_INT_ARRAY(ByteBuffer buffer, Collection<Integer> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 4 * value.size());
 		buf.put((byte) QAntDataType.INT_ARRAY.getTypeID());
@@ -880,7 +830,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer binEncode_LONG_ARRAY(ByteBuffer buffer, Collection<Long> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 8 * value.size());
@@ -892,7 +841,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_FLOAT_ARRAY(ByteBuffer buffer, Collection<Float> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 4 * value.size());
 		buf.put((byte) QAntDataType.FLOAT_ARRAY.getTypeID());
@@ -903,7 +851,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer binEncode_DOUBLE_ARRAY(ByteBuffer buffer, Collection<Double> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 8 * value.size());
 		buf.put((byte) QAntDataType.DOUBLE_ARRAY.getTypeID());
@@ -913,7 +860,6 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		}
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer binEncode_UTF_STRING_ARRAY(ByteBuffer buffer, Collection<String> value) {
 		int stringDataLen = 0;
@@ -936,14 +882,12 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 		return addData(buffer, buf.array());
 	}
 
-
 	private ByteBuffer encodeQAntObjectKey(ByteBuffer buffer, String value) {
 		ByteBuffer buf = ByteBuffer.allocate(2 + value.length());
 		buf.putShort((short) value.length());
 		buf.put(value.getBytes());
 		return addData(buffer, buf.array());
 	}
-
 
 	private ByteBuffer addData(ByteBuffer buffer, byte[] newData) {
 		if (buffer.remaining() < newData.length) {
@@ -960,6 +904,160 @@ public class DefaultQAntDataSerializer implements IQAntDataSerializer {
 
 		buffer.put(newData);
 		return buffer;
+	}
+
+	public IQAntObject pojo2qant(Object pojo) {
+		IQAntObject qantObj = QAntObject.newInstance();
+		try {
+			convertPojo(pojo, qantObj);
+		} catch (Exception e) {
+			throw new QAntRuntimeException(e);
+		}
+		return qantObj;
+	}
+
+	private void convertPojo(Object pojo, IQAntObject qantObj) throws Exception {
+		Class<?> pojoClazz = pojo.getClass();
+		String classFullName = pojoClazz.getCanonicalName();
+		if (classFullName == null) {
+			throw new IllegalArgumentException("Anonymous classes cannot be serialized!");
+		}
+
+		if (!(pojo instanceof SerializableQAntType)) {
+			throw new IllegalStateException("Cannot serialize object: " + pojo + ", type: " + classFullName
+					+ " -- It doesn't implement the SerializableQAntType interface");
+		}
+
+		qantObj.putUtfString(CLASS_MARKER_KEY, classFullName);
+		Field[] declaredFields;
+		for (int length = (declaredFields = pojoClazz.getDeclaredFields()).length, i = 0; i < length; ++i) {
+			Field field = declaredFields[i];
+			try {
+				int modifiers = field.getModifiers();
+				if (!Modifier.isTransient(modifiers)) {
+					if (!Modifier.isStatic(modifiers)) {
+						String fieldName = field.getName();
+						Object fieldValue = null;
+						if (Modifier.isPublic(modifiers)) {
+							fieldValue = field.get(pojo);
+						} else {
+							fieldValue = readValueFromGetter(fieldName, field.getType().getSimpleName(), pojo);
+						}
+						
+						wrapPojoField(qantObj, fieldName, fieldValue);
+					}
+				}
+			} catch (NoSuchMethodException err) {
+				QAntTracer.info(this.getClass(), "-- No public getter -- Serializer skipping private field: "
+						+ field.getName() + ", from class: " + pojoClazz);
+				err.printStackTrace();
+			}
+		}
+	}
+
+	private Object readValueFromGetter(String fieldName, String type, Object pojo) throws Exception {
+		Object value = null;
+		boolean isBool = type.equalsIgnoreCase("boolean");
+		String getterName = isBool ? ("is" + StringUtils.capitalize(fieldName))
+				: ("get" + StringUtils.capitalize(fieldName));
+		Method getterMethod = pojo.getClass().getMethod(getterName, (Class<?>[]) new Class[0]);
+		value = getterMethod.invoke(pojo, new Object[0]);
+		return value;
+	}
+
+	private QAntDataWrapper wrapPojoField(Object value) {
+		if (value == null) {
+			return new QAntDataWrapper(QAntDataType.NULL, null);
+		}
+
+		QAntDataWrapper wrapper = null;
+		if (value instanceof Boolean) {
+			wrapper = new QAntDataWrapper(QAntDataType.BOOL, value);
+		} else if (value instanceof Byte) {
+			wrapper = new QAntDataWrapper(QAntDataType.BYTE, value);
+		} else if (value instanceof Short) {
+			wrapper = new QAntDataWrapper(QAntDataType.SHORT, value);
+		} else if (value instanceof Integer) {
+			wrapper = new QAntDataWrapper(QAntDataType.INT, value);
+		} else if (value instanceof Long) {
+			wrapper = new QAntDataWrapper(QAntDataType.LONG, value);
+		} else if (value instanceof Float) {
+			wrapper = new QAntDataWrapper(QAntDataType.FLOAT, value);
+		} else if (value instanceof Double) {
+			wrapper = new QAntDataWrapper(QAntDataType.DOUBLE, value);
+		} else if (value instanceof String) {
+			wrapper = new QAntDataWrapper(QAntDataType.UTF_STRING, value);
+		} else if (value.getClass().isArray()) {
+			wrapper = new QAntDataWrapper(QAntDataType.QANT_ARRAY, unrollArray((Object[]) value));
+		} else if (value instanceof Collection) {
+			wrapper = new QAntDataWrapper(QAntDataType.QANT_ARRAY, unrollCollection((Collection) value));
+		} else if (value instanceof Map) {
+			wrapper = new QAntDataWrapper(QAntDataType.QANT_OBJECT, unrollMap((Map) value));
+		} else if (value instanceof SerializableQAntType) {
+			wrapper = new QAntDataWrapper(QAntDataType.QANT_OBJECT, pojo2qant(value));
+		}
+		return wrapper;
+	}
+
+	private void wrapPojoField(IQAntObject qantObj, String fieldName, Object value) {
+		if (value == null) {
+			qantObj.putNull(fieldName);
+			return;
+		}
+
+		if (value instanceof Boolean) {
+			qantObj.putBool(fieldName, (boolean) value);
+		} else if (value instanceof Byte) {
+			qantObj.putByte(fieldName, (byte) value);
+		} else if (value instanceof Short) {
+			qantObj.putShort(fieldName, (short) value);
+		} else if (value instanceof Integer) {
+			qantObj.putInt(fieldName, (int) value);
+		} else if (value instanceof Long) {
+			qantObj.putLong(fieldName, (long) value);
+		} else if (value instanceof Float) {
+			qantObj.putFloat(fieldName, (float) value);
+		} else if (value instanceof Double) {
+			qantObj.putDouble(fieldName, (double) value);
+		} else if (value instanceof String) {
+			qantObj.putUtfString(fieldName, (String) value);
+		} else if (value.getClass().isArray()) {
+			qantObj.putQAntArray(fieldName, unrollArray((Object[]) value));
+		} else if (value instanceof Collection) {
+			qantObj.putQAntArray(fieldName, unrollCollection((Collection) value));
+		} else if (value instanceof Map) {
+			qantObj.putQAntObject(fieldName, unrollMap((Map) value));
+		} else if (value instanceof SerializableQAntType) {
+			qantObj.putQAntObject(fieldName, pojo2qant(value));
+		}
+	}
+
+	private IQAntArray unrollArray(Object[] arr) {
+		IQAntArray array = QAntArray.newInstance();
+		for (Object item : arr) {
+			array.add(this.wrapPojoField(item));
+		}
+		return array;
+	}
+
+	private IQAntArray unrollCollection(Collection<Object> collection) {
+		IQAntArray array = QAntArray.newInstance();
+		for (Object item : collection) {
+			array.add(wrapPojoField(item));
+		}
+		return array;
+	}
+
+	private IQAntObject unrollMap(Map<Object, Object> map) {
+		IQAntObject qantObj = QAntObject.newInstance();
+		Set<Map.Entry<Object, Object>> entries = map.entrySet();
+		for (Map.Entry<Object, Object> item : entries) {
+			Object key = item.getKey();
+			if (key instanceof String) {
+				qantObj.put((String) key, wrapPojoField(item.getValue()));
+			}
+		}
+		return qantObj;
 	}
 
 }

@@ -13,4 +13,8 @@ public class QAntRuntimeException extends RuntimeException {
 		super(string);
 	}
 
+
+	public QAntRuntimeException(Exception e) {
+	}
+
 }
