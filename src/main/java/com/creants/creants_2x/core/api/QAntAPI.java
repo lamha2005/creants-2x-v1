@@ -105,7 +105,7 @@ public class QAntAPI implements IQAntApi {
 
 
 	@Override
-	public QAntUser login(Channel sender, String token, String zoneName, IQAntObject params, boolean forceLogout) {
+	public QAntUser login(Channel sender, String token, String zoneName, IQAntObject outParams, boolean forceLogout) {
 		if (!qant.getChannelManager().containsChannel(sender)) {
 			QAntTracer.warn(this.getClass(), "Login failed: " + token + " , channel is already expired!");
 			return null;
@@ -140,32 +140,39 @@ public class QAntAPI implements IQAntApi {
 		QAntUser user = new QAntUser(sender);
 		user.updateLastRequestTime();
 		user.setConnected(true);
-		if(params!= null){
-			String newUserName = params.getUtfString("$FS_NEW_LOGIN_NAME");
-            if (newUserName != null) {
-                user.setName(newUserName);
-            }
-		}
-		
-		
-
-		zone.login(user);
 
 		String verify = WebService.getInstance().verify(token);
 		JSONObject jo = JSONObject.fromObject(verify);
 		JSONObject userInfo = jo.getJSONObject("data");
+		long userId = userInfo.getLong("userId");
+		user.setCreantsUserId(userId);
+		
+		if (outParams != null) {
+			String newUserName = outParams.getUtfString("$FS_NEW_LOGIN_NAME");
+			if (newUserName != null) {
+				user.setName(newUserName);
+			}
+		}
+
+		if (user.getName() != null) {
+			user.setName("user_" + userId);
+		}
+		
+
+		zone.login(user);
+
 		resObj.putUtfString("tk", token);
 		resObj.putUtfString("fn", userInfo.getString("fullName"));
 		resObj.putUtfString("avt", userInfo.getString("avatar"));
 		resObj.putLong("mn", userInfo.getLong("money"));
-		resObj.putLong("uid", userInfo.getLong("userId"));
+		resObj.putLong("uid", userId);
+		resObj.putQAntObject("p", outParams);
 		response.write();
 
 		Map<IQAntEventParam, Object> evtParams = new HashMap<IQAntEventParam, Object>();
 		evtParams.put(QAntEventParam.ZONE, zone);
 		evtParams.put(QAntEventParam.USER, user);
 		qant.getEventManager().dispatchEvent(new QAntEvent(QAntEventType.USER_JOIN_ZONE, evtParams));
-
 		return user;
 	}
 

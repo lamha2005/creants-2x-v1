@@ -83,7 +83,7 @@ public class QAntServer {
 	}
 
 
-	private void start() throws InterruptedException {
+	public void start() throws InterruptedException {
 		QAntTracer.debug(this.getClass(), "======================== QUEEN ANT SOCKET =====================");
 		initialize();
 

@@ -25,26 +25,9 @@ QANT2X.DataType = {
     QANT_OBJECT: 18
 }
 
-QANT2X.DataType.Name = {
-    0: 'NULL',
-    1: 'BOOL',
-    2: 'BYTE',
-    3: 'SHORT',
-    4: 'INT',
-    5: 'LONG',
-    6: 'FLOAT',
-    7: 'DOUBLE',
-    8: 'UTF_STRING',
-    9: 'BOOL_ARRAY',
-    10: 'BYTE_ARRAY',
-    11: 'SHORT_ARRAY',
-    12: 'INT_ARRAY',
-    13: 'LONG_ARRAY',
-    14: 'FLOAT_ARRAY',
-    15: 'DOUBLE_ARRAY',
-    16: 'UTF_STRING_ARRAY',
-    17: 'QANT_ARRAY',
-    18: 'QANT_OBJECT'
+QANT2X.DataType.Name = {};
+for (var key in QANT2X.DataType) {
+    QANT2X.DataType.Name[QANT2X.DataType[key]] = key;
 }
 
 QANT2X.SystemRequest = {
@@ -136,7 +119,7 @@ QANT2X.QAntDataSerializer = {
         var dataType = buffer.readByte();
         if (dataType != QANT2X.DataType.QANT_OBJECT) {
             console.log("[QANT2X_API] [ERROR] Invalid CASDataType. Expected: " + QANT2X.DataType.QANT_OBJECT
-                + ", found: " + dataType);
+            + ", found: " + dataType);
             return null;
         }
 
@@ -196,6 +179,8 @@ QANT2X.QAntDataSerializer = {
             decodedObject = this.binDecode_SHORT_ARRAY(buffer);
         } else if (dataType == QANT2X.DataType.INT_ARRAY) {
             decodedObject = this.binDecode_INT_ARRAY(buffer);
+        } else if (dataType == QANT2X.DataType.UTF_STRING_ARRAY) {
+            decodedObject = this.binDecode_UTF_STRING_ARRAY(buffer);
         } else if (dataType == QANT2X.DataType.QANT_ARRAY) {
             if (dataType != QANT2X.DataType.QANT_ARRAY) {
                 console.log("Can not decode array with QAntDataType ID:" + dataType);
@@ -213,6 +198,21 @@ QANT2X.QAntDataSerializer = {
         }
 
         return decodedObject;
+    },
+
+    binDecode_UTF_STRING_ARRAY: function (buffer) {
+        var arraySize = buffer.readShort();
+        if (arraySize < 0) {
+            console.log("Error decoding typed array size. binDecode_UTF_STRING_ARRAY Negative size: " + arraySize);
+            return null;
+        }
+
+        var array = new Array();
+        for (var j = 0; j < arraySize; ++j) {
+            var stringValue = this.binDecode_UTF_STRING(buffer);
+            array.push(stringValue);
+        }
+        return new QAntDataWrapper(QANT2X.DataType.UTF_STRING_ARRAY, array);
     },
 
     binDecode_SHORT_ARRAY: function (buffer) {
@@ -525,7 +525,27 @@ QAntArrayObject.prototype.dumpConsole = function () {
     }
     buffer.append('}');
     return buffer.toPrettyString();
+}
 
+QAntArrayObject.prototype.toJson = function () {
+    var jsonObj = [];
+    var obj;
+    for (var i = 0; i < this.size(); i++) {
+        var wrappedObject = this.dataHolder[i];
+        if (wrappedObject.getType() == QANT2X.DataType.QANT_OBJECT) {
+            obj = wrappedObject.getObject().toJson();
+        } else if (wrappedObject.getType() == QANT2X.DataType.QANT_ARRAY) {
+            obj = wrappedObject.getObject().toJson();
+        } else if (wrappedObject.getType() == QANT2X.DataType.BYTE_ARRAY) {
+
+        } else {
+            obj = wrappedObject.getObject();
+        }
+
+        jsonObj.push(obj);
+    }
+
+    return jsonObj;
 }
 
 
@@ -558,6 +578,23 @@ QAntObject.prototype.putObj = function (key, value, dataType) {
         this.dataHolder[key] = new QAntDataWrapper(dataType, value);
     }
 
+}
+
+QAntObject.prototype.toJson = function () {
+    var jsonObj = {};
+    for (var key in this.dataHolder) {
+        var wrapper = this.dataHolder[key];
+        if (wrapper.getType() == QANT2X.DataType.QANT_OBJECT) {
+            jsonObj[key] = wrapper.getObject().toJson();
+        } else if (wrapper.getType() == QANT2X.DataType.QANT_ARRAY) {
+            jsonObj[key] = wrapper.getObject().toJson();
+        } else if (wrapper.getType() == QANT2X.DataType.BYTE_ARRAY) {
+        } else {
+            jsonObj[key] = wrapper.getObject();
+        }
+    }
+
+    return jsonObj;
 }
 
 QAntObject.prototype.putQAntArray = function (key, value) {
@@ -645,6 +682,7 @@ QAntObject.prototype.toBinary = function () {
     return QANT2X.QAntDataSerializer.object2binary(this);
 }
 
+
 QAntObject.prototype.getKeys = function () {
     return Object.keys(this.dataHolder);
 }
@@ -699,7 +737,6 @@ QAntObject.prototype.dumpConsole = function () {
     }
     buffer.append('}');
     return buffer.toPrettyString();
-
 }
 
 function StringBuilder() {
