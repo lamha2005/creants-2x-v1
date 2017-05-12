@@ -162,7 +162,9 @@ QANT2X.QAntDataSerializer = {
         var decodedObject;
         var dataType = buffer.readByte();
         if (dataType == QANT2X.DataType.NULL) {
-
+            decodedObject = this.binDecode_NULL(buffer);
+        } else if (dataType == QANT2X.DataType.BOOL) {
+            decodedObject = this.binDecode_BOOL(buffer);
         } else if (dataType == QANT2X.DataType.UTF_STRING) {
             decodedObject = this.binDecode_UTF_STRING(buffer);
         } else if (dataType == QANT2X.DataType.LONG) {
@@ -198,6 +200,14 @@ QANT2X.QAntDataSerializer = {
         }
 
         return decodedObject;
+    },
+
+    binDecode_NULL: function(buffer){
+        return new QAntDataWrapper(QANT2X.DataType.NULL, null);
+    },
+
+    binDecode_BOOL: function (buffer) {
+        return new QAntDataWrapper(QANT2X.DataType.BOOL, buffer.readByte() === 1);
     },
 
     binDecode_UTF_STRING_ARRAY: function (buffer) {

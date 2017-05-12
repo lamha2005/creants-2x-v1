@@ -1,9 +1,10 @@
 package com.creants.creants_2x.socket.gate.wood;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.creants.creants_2x.QAntServer;
 import com.creants.creants_2x.core.entities.Room;
@@ -36,6 +37,7 @@ public class QAntUser implements IQAntUser {
 	private Channel channel;
 	private final LinkedList<Room> joinedRooms;
 	private boolean isConnected;
+	private final ConcurrentMap<Object, Object> properties;
 	private Zone currentZone;
 
 
@@ -49,6 +51,7 @@ public class QAntUser implements IQAntUser {
 		joinedRooms = new LinkedList<Room>();
 		this.channel = channel;
 		this.name = name;
+		this.properties = new ConcurrentHashMap<Object, Object>();
 	}
 
 
@@ -140,14 +143,26 @@ public class QAntUser implements IQAntUser {
 
 
 	@Override
-	public <V> V getAttribute(Object key, Class<V> clazz) {
-		return null;
+	public Object getProperty(final Object key) {
+		return this.properties.get(key);
 	}
 
 
 	@Override
-	public Iterator<Object> getAttributeKeys() {
-		return null;
+	public void setProperty(final Object key, final Object val) {
+		this.properties.put(key, val);
+	}
+
+
+	@Override
+	public boolean containsProperty(final Object key) {
+		return this.properties.containsKey(key);
+	}
+
+
+	@Override
+	public void removeProperty(final Object key) {
+		this.properties.remove(key);
 	}
 
 
@@ -291,18 +306,6 @@ public class QAntUser implements IQAntUser {
 
 	@Override
 	public void initialize(String version, long sessionId, long clientId, byte deviceType, long createTime) {
-
-	}
-
-
-	@Override
-	public void removeAttribute(Object key) {
-
-	}
-
-
-	@Override
-	public void setAttribute(Object key, Object value) {
 
 	}
 
