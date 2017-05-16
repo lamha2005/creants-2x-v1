@@ -171,7 +171,9 @@ QANT2X.QAntDataSerializer = {
             decodedObject = this.binDecode_LONG(buffer);
         } else if (dataType == QANT2X.DataType.INT) {
             decodedObject = this.binDecode_INT(buffer);
-        } else if (dataType == QANT2X.DataType.SHORT) {
+        } else if (dataType == QANT2X.DataType.FLOAT) {
+            decodedObject = this.binDecode_FLOAT(buffer);
+        }  else if (dataType == QANT2X.DataType.SHORT) {
             decodedObject = this.binDecode_SHORT(buffer);
         } else if (dataType == QANT2X.DataType.BYTE) {
             decodedObject = this.binDecode_BYTE(buffer);
@@ -200,6 +202,10 @@ QANT2X.QAntDataSerializer = {
         }
 
         return decodedObject;
+    },
+
+    binDecode_FLOAT: function(buffer){
+        return new QAntDataWrapper(QANT2X.DataType.FLOAT, buffer.readFloat());
     },
 
     binDecode_NULL: function(buffer){
@@ -311,7 +317,7 @@ QANT2X.QAntDataSerializer = {
         }
 
         var strData = buffer.readBytes(strLen);
-        return new QAntDataWrapper(QANT2X.DataType.UTF_STRING, this.bytes2String(strData));
+        return new QAntDataWrapper(QANT2X.DataType.UTF_STRING, (new TextDecoder("utf-8")).decode(strData));
     },
 
     encodeQAntObjectKey: function (dataStream, value) {
