@@ -17,7 +17,7 @@ public class DefaultObjectDumpFormatter {
 			return "Null";
 		}
 
-		return String.format("Byte[%s]", bytes.length);
+		return String.format("Byte[%s] %s", bytes.length,  Arrays.toString(bytes));
 	}
 
 

@@ -430,6 +430,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 
 					executeEventCommand((QAntSystemEvent) event);
 				} catch (Exception e) {
+					e.printStackTrace();
 					QAntTracer.warn(this.getClass(), "Error during event handling: " + e + ", Listener: " + listener);
 				}
 			}

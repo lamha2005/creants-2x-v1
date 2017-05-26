@@ -74,6 +74,7 @@ public class ResponseApi implements IResponseApi {
 
 		IResponse response = (IResponse) new Response();
 		response.setId(SystemRequest.CallExtension.getId());
+		response.setTargetController((byte) 1);
 		response.setContent(resObj);
 		response.setRecipients(Recipient);
 		response.write();
