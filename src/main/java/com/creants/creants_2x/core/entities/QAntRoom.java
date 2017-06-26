@@ -2,6 +2,8 @@ package com.creants.creants_2x.core.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.creants.creants_2x.core.exception.QAntErrorCode;
@@ -37,6 +39,7 @@ public class QAntRoom implements Room {
 	private volatile boolean active;
 	private volatile IQAntExtension extension;
 	private int maxRoomVariablesAllowed;
+	private final Map<Object, Object> properties;
 	private Zone zone;
 
 	static {
@@ -59,6 +62,7 @@ public class QAntRoom implements Room {
 		this.name = name;
 		this.active = false;
 		this.userManager = new UserManager();
+		this.properties = new ConcurrentHashMap<Object, Object>();
 	}
 
 
@@ -459,6 +463,25 @@ public class QAntRoom implements Room {
 	@Override
 	public void setExtension(IQAntExtension extension) {
 		this.extension = extension;
+	}
+
+
+	@Override
+	public Object getProperty(Object key) {
+		return properties.get(key);
+	}
+
+
+	@Override
+	public void setProperty(Object key, Object value) {
+		properties.put(key, value);
+	}
+
+
+	@Override
+	public void setProperties(final Map<Object, Object> props) {
+		this.properties.clear();
+		this.properties.putAll(props);
 	}
 
 

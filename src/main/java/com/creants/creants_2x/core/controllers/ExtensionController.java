@@ -22,9 +22,11 @@ public class ExtensionController extends AbstractController {
 	private final QAntServer qant;
 	private IExtensionManager extensionManager;
 
+
 	public ExtensionController() {
 		qant = QAntServer.getInstance();
 	}
+
 
 	public void init(Object o) {
 		QAntTracer.info(this.getClass(), "- init ExtensionController");
@@ -32,10 +34,12 @@ public class ExtensionController extends AbstractController {
 		extensionManager = qant.getExtensionManager();
 	}
 
+
 	public void destroy(Object o) {
 		super.destroy(o);
 		extensionManager = null;
 	}
+
 
 	@Override
 	public void processRequest(IRequest request) throws Exception {
@@ -45,7 +49,7 @@ public class ExtensionController extends AbstractController {
 		if (sender == null) {
 			throw new QAntExtensionException("Extension Request refused. Sender is not a User: " + request.getSender());
 		}
-		IQAntObject reqObj = (IQAntObject) request.getContent();
+		IQAntObject reqObj = request.getContent();
 		QAntTracer.debug(this.getClass(), reqObj.getDump());
 
 		String cmd = reqObj.getUtfString(KEY_EXT_CMD);

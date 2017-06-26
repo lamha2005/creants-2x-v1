@@ -2,6 +2,8 @@ package com.creants.creants_2x.socket.gate;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.creants.creants_2x.QAntServer;
+import com.creants.creants_2x.core.api.IQAntApi;
 import com.creants.creants_2x.core.controllers.DefaultControllerManager;
 import com.creants.creants_2x.core.controllers.IController;
 import com.creants.creants_2x.core.controllers.IControllerManager;
@@ -35,10 +37,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<IQAntObject> {
 	private static final AtomicLong nextSessionId = new AtomicLong(System.currentTimeMillis());
 
 	protected IControllerManager controllerManager;
+	protected IQAntApi qantApi;
 
 
 	public MessageHandler() {
-
 	}
 
 
@@ -53,6 +55,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<IQAntObject> {
 
 	public void init() {
 		controllerManager = getControllerManager();
+		qantApi = QAntServer.getInstance().getAPIManager().getQAntApi();
 	}
 
 
@@ -127,6 +130,8 @@ public class MessageHandler extends SimpleChannelInboundHandler<IQAntObject> {
 
 	@Override
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+		System.out.println("-------------------------- handler removed -----------------------------");
+		qantApi.disconnect(ctx.channel());
 	}
 
 }

@@ -5,20 +5,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
 /**
  * @author LamHM
  *
  */
 public class ZoneSettings implements Serializable {
 	private static final long serialVersionUID = 1129722650457265928L;
+	@JacksonXmlProperty(localName = "ZoneName", isAttribute = true)
 	public String name;
+	@JacksonXmlProperty(localName = "CustomLogin", isAttribute = true)
 	public boolean isCustomLogin;
+	@JacksonXmlProperty(localName = "Encrypted", isAttribute = true)
 	public boolean isEncrypted;
+	@JacksonXmlProperty(localName = "MaxUsers", isAttribute = true)
 	public int maxUsers;
 	public List<RoomSettings> rooms;
 	private static final transient AtomicInteger idGenerator;
 	private transient Integer id;
+	@JacksonXmlProperty(localName = "GuestUserNamePrefix", isAttribute = true)
 	public String guestUserNamePrefix;
+	@JacksonXmlProperty(localName = "ExtensionSettings")
 	public ExtensionSettings extension;
 
 	static {
@@ -121,10 +129,15 @@ public class ZoneSettings implements Serializable {
 
 	public static final class ExtensionSettings implements Serializable {
 		private static final long serialVersionUID = 1L;
+		@JacksonXmlProperty(localName = "Name", isAttribute = true)
 		public String name;
+		@JacksonXmlProperty(localName = "Type", isAttribute = true)
 		public String type;
+		@JacksonXmlProperty(localName = "File", isAttribute = true)
 		public String file;
+		@JacksonXmlProperty(localName = "PropertiesFile", isAttribute = true)
 		public String propertiesFile;
+		@JacksonXmlProperty(localName = "ReloadMode", isAttribute = true)
 		public String reloadMode;
 
 

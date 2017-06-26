@@ -1,5 +1,7 @@
 package com.creants.creants_2x.core.managers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -49,7 +51,7 @@ public class QAntZoneManager extends BaseCoreService implements IZoneManager {
 
 	@Override
 	public List<Zone> getZoneList() {
-		return null;
+		return new ArrayList<>(zones.values());
 	}
 
 

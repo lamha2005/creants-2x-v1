@@ -59,6 +59,7 @@ public class ResponseApi implements IResponseApi {
 		response.setId((short) SystemRequest.JoinRoom.getId());
 		response.setContent(resObj);
 		response.setRecipients(recipient.getChannel());
+		resObj.putQAntArray("r", joinedRoom.toQAntArray(false));
 		response.write();
 	}
 
@@ -85,6 +86,7 @@ public class ResponseApi implements IResponseApi {
 	public void sendPingPongResponse(Channel recipient) {
 		IResponse response = (IResponse) new Response();
 		response.setId(SystemRequest.PingPong.getId());
+		response.setTargetController((byte) 0);
 		response.setContent(new QAntObject());
 		response.setRecipients(recipient);
 		response.write();

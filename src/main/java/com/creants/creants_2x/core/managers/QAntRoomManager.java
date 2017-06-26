@@ -42,6 +42,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 	private Zone ownerZone;
 	private Class<? extends IPlayerIdGenerator> playerIdGeneratorClass;
 
+
 	public QAntRoomManager() {
 		this.playerIdGeneratorClass = DefaultPlayerIdGenerator.class;
 		this.qant = QAntServer.getInstance();
@@ -53,10 +54,12 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		this.roomFactory = qant.getServiceProvider().getRoomFactory();
 	}
 
+
 	@Override
 	public Room createRoom(CreateRoomSettings params) throws QAntCreateRoomException {
 		return createRoom(params, null);
 	}
+
 
 	@Override
 	public Room createRoom(CreateRoomSettings params, QAntUser owner) throws QAntCreateRoomException {
@@ -88,6 +91,11 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 
 		addRoom(newRoom);
 		newRoom.setActive(true);
+
+		if (params.getRoomProperties() != null) {
+			newRoom.setProperties(params.getRoomProperties());
+		}
+
 		if (params.getExtension() != null && params.getExtension().getId() != null
 				&& params.getExtension().getId().length() > 0) {
 			try {
@@ -104,6 +112,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 				newRoom.toString(), newRoom.getClass().getSimpleName()));
 		return newRoom;
 	}
+
 
 	private void createRoomExtension(Room room, CreateRoomSettings.RoomExtensionSettings params)
 			throws QAntExtensionException {
@@ -123,15 +132,18 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		qant.getExtensionManager().createExtension(extSettings, extLevel, room.getZone(), room);
 	}
 
+
 	@Override
 	public Class<? extends IPlayerIdGenerator> getDefaultRoomPlayerIdGenerator() {
 		return this.playerIdGeneratorClass;
 	}
 
+
 	@Override
 	public void setDefaultRoomPlayerIdGeneratorClass(final Class<? extends IPlayerIdGenerator> customIdGeneratorClass) {
 		this.playerIdGeneratorClass = customIdGeneratorClass;
 	}
+
 
 	@Override
 	public void addGroup(final String groupId) {
@@ -139,6 +151,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 			groups.add(groupId);
 		}
 	}
+
 
 	@Override
 	public void addRoom(Room room) {
@@ -152,6 +165,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		addRoomToGroup(room);
 	}
 
+
 	@Override
 	public boolean containsGroup(String groupId) {
 		boolean flag = false;
@@ -162,6 +176,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		return flag;
 	}
 
+
 	@Override
 	public List<String> getGroups() {
 		List<String> groupsCopy = null;
@@ -171,20 +186,24 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		return groupsCopy;
 	}
 
+
 	@Override
 	public Room getRoomById(int id) {
 		return this.roomsById.get(id);
 	}
+
 
 	@Override
 	public Room getRoomByName(final String name) {
 		return this.roomsByName.get(name);
 	}
 
+
 	@Override
 	public List<Room> getRoomList() {
 		return new LinkedList<Room>(this.roomsByName.values());
 	}
+
 
 	@Override
 	public List<Room> getRoomListFromGroup(final String groupId) {
@@ -201,15 +220,18 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		return copyOfRoomList;
 	}
 
+
 	@Override
 	public int getGameRoomCount() {
 		return this.gameRoomCounter.get();
 	}
 
+
 	@Override
 	public int getTotalRoomCount() {
 		return roomsById.size();
 	}
+
 
 	@Override
 	public void removeGroup(String groupId) {
@@ -217,6 +239,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 			groups.remove(groupId);
 		}
 	}
+
 
 	@Override
 	public void removeRoom(int roomId) {
@@ -228,6 +251,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		}
 	}
 
+
 	@Override
 	public void removeRoom(String name) {
 		Room room = roomsByName.get(name);
@@ -237,6 +261,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 			removeRoom(room);
 		}
 	}
+
 
 	public void removeRoom(Room room) {
 		try {
@@ -266,26 +291,31 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 				String.format("Room removed: %s, %s", room.getZone().toString(), room.toString()));
 	}
 
+
 	@Override
 	public boolean containsRoom(int id, String groupId) {
 		Room room = roomsById.get(id);
 		return isRoomContainedInGroup(room, groupId);
 	}
 
+
 	@Override
 	public boolean containsRoom(int id) {
 		return roomsById.containsKey(id);
 	}
+
 
 	@Override
 	public boolean containsRoom(Room room, String groupId) {
 		return isRoomContainedInGroup(room, groupId);
 	}
 
+
 	@Override
 	public boolean containsRoom(Room room) {
 		return roomsById.containsValue(room);
 	}
+
 
 	@Override
 	public boolean containsRoom(String name, String groupId) {
@@ -293,20 +323,24 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		return isRoomContainedInGroup(room, groupId);
 	}
 
+
 	@Override
 	public boolean containsRoom(String name) {
 		return roomsByName.containsKey(name);
 	}
+
 
 	@Override
 	public Zone getOwnerZone() {
 		return ownerZone;
 	}
 
+
 	@Override
 	public void setOwnerZone(final Zone zone) {
 		ownerZone = zone;
 	}
+
 
 	@Override
 	public void removeUser(QAntUser user) {
@@ -314,6 +348,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 			removeUser(user, room);
 		}
 	}
+
 
 	@Override
 	public void removeUser(QAntUser user, Room room) {
@@ -330,10 +365,12 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		handleAutoRemove(room);
 	}
 
+
 	@Override
 	public void checkAndRemove(Room room) {
 		handleAutoRemove(room);
 	}
+
 
 	@Override
 	public void changeRoomName(Room room, String newName) throws QAntRoomException {
@@ -350,6 +387,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		roomsByName.remove(oldName);
 	}
 
+
 	@Override
 	public void changeRoomPasswordState(Room room, String password) {
 		if (room == null) {
@@ -360,6 +398,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		}
 		room.setPassword(password);
 	}
+
 
 	@Override
 	public void changeRoomCapacity(Room room, int newMaxUsers, int newMaxSpect) {
@@ -377,14 +416,17 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		}
 	}
 
+
 	private void handleAutoRemove(Room room) {
 	}
+
 
 	private void removeWhenEmpty(Room room) {
 		if (room.isEmpty()) {
 			qant.getAPIManager().getQAntApi().removeRoom(room);
 		}
 	}
+
 
 	private void removeWhenEmptyAndCreatorIsGone(Room room) {
 		QAntUser owner = room.getOwner();
@@ -393,6 +435,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		}
 	}
 
+
 	private boolean isRoomContainedInGroup(Room room, String groupId) {
 		boolean flag = false;
 		if (room != null && room.getGroupId().equals(groupId) && containsGroup(groupId)) {
@@ -400,6 +443,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		}
 		return flag;
 	}
+
 
 	private void addRoomToGroup(Room room) {
 		String groupId = room.getGroupId();
@@ -413,6 +457,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		}
 	}
 
+
 	private void removeRoomFromGroup(Room room) {
 		final List<Room> roomList = roomsByGroup.get(room.getGroupId());
 		if (roomList != null) {
@@ -424,6 +469,7 @@ public final class QAntRoomManager extends BaseCoreService implements IRoomManag
 		QAntTracer.info(this.getClass(), "Cannot remove room: " + room.getName() + " from it's group: "
 				+ room.getGroupId() + ". The group was not found.");
 	}
+
 
 	private void validateRoomName(String roomName) throws QAntRoomException {
 		if (containsRoom(roomName)) {

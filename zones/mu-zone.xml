@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ZoneList>
+	<ZoneSettings ZoneName="mus1" CustomLogin="true" Encrypted="false" MaxUsers="100000" GuestUserNamePrefix="Guest#">
+		<ExtensionSettings Name="mu-fantasy-ext.jar" Type="JAVA" File="com.creants.muext.MuFantasyExtension" PropertiesFile="" ReloadMode="AUTO"/>
+	</ZoneSettings>
+</ZoneList>
+

@@ -45,6 +45,7 @@ import net.sf.json.JSONObject;
  */
 public class QAntAPI implements IQAntApi {
 	private static final byte SYSTEM_CONTROLLER = 0;
+	private static final String NAME_BY_SERVER = "$FS_NAME_BY_SERVER";
 	protected final QAntServer qant;
 	protected final IUserManager globalUserManager;
 	protected final IResponseApi responseAPI;
@@ -53,7 +54,7 @@ public class QAntAPI implements IQAntApi {
 
 	public QAntAPI(QAntServer qant) {
 		this.qant = qant;
-		globalUserManager = this.qant.getUserManager();
+		globalUserManager = qant.getUserManager();
 		responseAPI = new ResponseApi();
 		matcher = MatchingUtils.getInstance();
 	}
@@ -120,9 +121,7 @@ public class QAntAPI implements IQAntApi {
 
 		Zone zone = qant.getZoneManager().getZoneByName(zoneName);
 		if (zone == null) {
-			resObj.putShort("ec", QAntErrorCode.LOGIN_BAD_ZONENAME.getId());
-			resObj.putUtfString("ep", zoneName);
-			response.write();
+			sendError(zoneName, response, QAntErrorCode.LOGIN_BAD_ZONENAME);
 			QAntTracer.info(this.getClass(),
 					"Bad login request, Zone: " + zoneName + " does not exist. Requested by: " + sender);
 			return null;
@@ -130,50 +129,79 @@ public class QAntAPI implements IQAntApi {
 
 		boolean dc = qant.getUserManager().getUserByChannel(sender) != null;
 		if (dc) {
-			resObj.putShort("ec", QAntErrorCode.LOGIN_ALREADY_LOGGED.getId());
-			response.write();
-			QAntTracer.info(this.getClass(),
-					"Bad login request, Zone: " + zoneName + " does not exist. Requested by: " + sender);
+			sendError(zoneName, response, QAntErrorCode.LOGIN_ALREADY_LOGGED);
+			QAntTracer.info(this.getClass(), "Bad login request, Zone: " + zoneName + ", reason: "
+					+ QAntErrorCode.LOGIN_ALREADY_LOGGED.getName() + ". Requested by: " + sender);
 			return null;
 		}
 
 		QAntUser user = new QAntUser(sender);
 		user.updateLastRequestTime();
 		user.setConnected(true);
+		String verify = null;
+		try {
+			verify = WebService.getInstance().verify(token);
+		} catch (Exception e) {
+			sendError(zoneName, response, QAntErrorCode.GRAPH_API_FAIL);
+			QAntTracer.info(this.getClass(), "Bad login request, Zone: " + zoneName + ", reason:"
+					+ QAntErrorCode.GRAPH_API_FAIL.getName() + ". Requested by: " + sender);
+			return null;
+		}
 
-		String verify = WebService.getInstance().verify(token);
 		JSONObject jo = JSONObject.fromObject(verify);
+		int code = jo.getInt("code");
+		if (code != 1) {
+			sendError(zoneName, response, QAntErrorCode.TOKEN_EXPIRED);
+			QAntTracer.debug(this.getClass(), "Bad login request, Zone: " + zoneName + ", reason:"
+					+ QAntErrorCode.TOKEN_EXPIRED.getName() + ". Requested by: " + sender + "/token: " + token);
+			return null;
+		}
 		JSONObject userInfo = jo.getJSONObject("data");
 		long userId = userInfo.getLong("userId");
 		user.setCreantsUserId(userId);
-		
-		if (outParams != null) {
-			String newUserName = outParams.getUtfString("$FS_NEW_LOGIN_NAME");
-			if (newUserName != null) {
-				user.setName(newUserName);
+
+		Boolean nameByServer = outParams.getBool(NAME_BY_SERVER);
+		if (nameByServer) {
+			user.setName(zoneName + "#" + userId);
+		} else {
+			if (outParams != null) {
+				String newUserName = outParams.getUtfString("$FS_NEW_LOGIN_NAME");
+				if (newUserName != null) {
+					user.setName(newUserName);
+				}
+			}
+
+			if (user.getName() == null) {
+				user.setName("user_" + userId);
 			}
 		}
-
-		if (user.getName() != null) {
-			user.setName("user_" + userId);
-		}
-		
 
 		zone.login(user);
 
 		resObj.putUtfString("tk", token);
 		resObj.putUtfString("fn", userInfo.getString("fullName"));
 		resObj.putUtfString("avt", userInfo.getString("avatar"));
+		resObj.putUtfString("un", user.getName());
 		resObj.putLong("mn", userInfo.getLong("money"));
 		resObj.putLong("uid", userId);
 		resObj.putQAntObject("p", outParams);
 		response.write();
+		user.setAvatar(userInfo.getString("avatar"));
 
 		Map<IQAntEventParam, Object> evtParams = new HashMap<IQAntEventParam, Object>();
 		evtParams.put(QAntEventParam.ZONE, zone);
 		evtParams.put(QAntEventParam.USER, user);
 		qant.getEventManager().dispatchEvent(new QAntEvent(QAntEventType.USER_JOIN_ZONE, evtParams));
 		return user;
+	}
+
+
+	private void sendError(String zoneName, IResponse response, QAntErrorCode errCode) {
+		IQAntObject resObj = QAntObject.newInstance();
+		resObj.putShort("ec", errCode.getId());
+		resObj.putUtfString("ep", zoneName);
+		resObj.putUtfString("rs", errCode.getName());
+		response.write();
 	}
 
 
@@ -212,9 +240,12 @@ public class QAntAPI implements IQAntApi {
 		evtParams.put(QAntEventParam.JOINED_ROOMS, joinedRooms);
 		evtParams.put(QAntEventParam.PLAYER_IDS_BY_ROOM, playerIds);
 		qant.getEventManager().dispatchEvent(new QAntEvent(QAntEventType.USER_DISCONNECT, evtParams));
-		for (Room r : user.getCreatedRooms()) {
-			if (r != null && !joinedRooms.contains(r)) {
-				zone.checkAndRemove(r);
+		List<Room> createdRooms = user.getCreatedRooms();
+		if (createdRooms != null && createdRooms.size() > 0) {
+			for (Room r : createdRooms) {
+				if (r != null && !joinedRooms.contains(r)) {
+					zone.checkAndRemove(r);
+				}
 			}
 		}
 

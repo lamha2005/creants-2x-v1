@@ -1,10 +1,10 @@
 {
-	"name":"MuFantasyExtionsion",
+	"name": "mus1",
+	"viewName": "Đầm lầy chết",
 	"isCustomLogin": true,
-	"maxUsers" : 1000000,
-	"isEncrypted" : false,
-	"maxRooms":500,
-	
+	"maxUsers": 1000000,
+	"isEncrypted": false,
+	"maxRooms": 500,
 	"extension": {
 		"name": "MuFantasyExtension",
 		"type": "Java",
@@ -12,3 +12,4 @@
 		"reloadMode": "AUTO"
 	}
 }
+

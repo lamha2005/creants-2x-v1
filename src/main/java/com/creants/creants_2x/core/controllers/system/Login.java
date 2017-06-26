@@ -22,7 +22,7 @@ import com.creants.creants_2x.socket.io.IRequest;
  */
 public class Login extends BaseControllerCommand {
 	private static final String TOKEN = "tk";
-	private static final String ZONE_NAME = "zn";
+	private static final String ZONE_NAME = "zid";
 	private static final String REQUEST_LOGIN_DATA_OUT = "$FS_REQUEST_LOGIN_DATA_OUT";
 
 	public Login() {
@@ -36,7 +36,7 @@ public class Login extends BaseControllerCommand {
 		String token = reqObj.getUtfString(TOKEN);
 		String zoneName = reqObj.getUtfString(ZONE_NAME);
 		if (zoneName == null)
-			zoneName = "MuFantasy";
+			zoneName = "mus1";
 
 		IQAntObject params = (IQAntObject) request.getAttribute(REQUEST_LOGIN_DATA_OUT);
 		api.login(request.getSender(), token, zoneName, params);
@@ -50,7 +50,7 @@ public class Login extends BaseControllerCommand {
 
 		String zoneName = params.getUtfString(ZONE_NAME);
 		if (zoneName == null)
-			zoneName = "MuFantasy";
+			zoneName = "mus1";
 		Zone zone = qant.getZoneManager().getZoneByName(zoneName);
 		return customLogin(params, request, zone);
 	}

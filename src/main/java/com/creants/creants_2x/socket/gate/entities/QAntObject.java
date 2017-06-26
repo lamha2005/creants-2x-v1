@@ -66,7 +66,7 @@ public class QAntObject implements IQAntObject {
 
 
 	@Override
-	public boolean containsKey(final String key) {
+	public boolean containsKey(String key) {
 		return dataHolder.containsKey(key);
 	}
 

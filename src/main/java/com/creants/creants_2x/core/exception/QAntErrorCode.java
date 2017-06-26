@@ -47,13 +47,17 @@ public enum QAntErrorCode implements IErrorCode {
 	BUDDY_TOO_MANY_VARIABLES("BUDDY_TOO_MANY_VARIABLES", 39),
 	JOIN_GAME_ACCESS_DENIED("JOIN_GAME_ACCESS_DENIED", 40),
 	JOIN_GAME_NOT_FOUND("JOIN_GAME_NOT_FOUND", 41),
-	INVITATION_NOT_VALID("INVITATION_NOT_VALID", 42);
+	INVITATION_NOT_VALID("INVITATION_NOT_VALID", 42),
+	GRAPH_API_FAIL("GRAPH_API_FAIL", 43),
+	TOKEN_EXPIRED("TOKEN_EXPIRED", 44);
 
 	private short id;
+	private String name;
 
 
 	private QAntErrorCode(String s, int id) {
 		this.id = (short) id;
+		this.name = s;
 	}
 
 
@@ -61,4 +65,10 @@ public enum QAntErrorCode implements IErrorCode {
 	public short getId() {
 		return this.id;
 	}
+
+
+	public String getName() {
+		return name;
+	}
+
 }

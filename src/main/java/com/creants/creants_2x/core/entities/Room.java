@@ -1,6 +1,7 @@
 package com.creants.creants_2x.core.entities;
 
 import java.util.List;
+import java.util.Map;
 
 import com.creants.creants_2x.core.exception.QAntJoinRoomException;
 import com.creants.creants_2x.core.extension.IQAntExtension;
@@ -163,4 +164,13 @@ public interface Room {
 
 
 	IQAntArray toQAntArray(final boolean p0);
+
+
+	Object getProperty(Object key);
+
+
+	void setProperty(Object key, Object value);
+
+
+	void setProperties(Map<Object, Object> props);
 }

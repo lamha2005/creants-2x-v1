@@ -7,8 +7,9 @@ package com.creants.creants_2x.core.exception;
 public class QAntRoomException extends QAntException {
 	private static final long serialVersionUID = 1L;
 
-	public QAntRoomException(String message, QAntErrorData errorData) {
-	}
 
+	public QAntRoomException(String message, QAntErrorData errorData) {
+		super(message, errorData);
+	}
 
 }

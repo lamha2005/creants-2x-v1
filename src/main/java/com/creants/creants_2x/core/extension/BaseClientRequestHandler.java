@@ -40,4 +40,9 @@ public abstract class BaseClientRequestHandler implements IClientRequestHandler 
 		this.parentExtension.send(cmdName, params, recipients);
 	}
 
+
+	protected void sendError(IQAntObject params, QAntUser recipient) {
+		this.parentExtension.send("cmd_exception", params, recipient);
+	}
+
 }
