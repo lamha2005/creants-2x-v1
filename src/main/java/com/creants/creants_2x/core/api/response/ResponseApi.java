@@ -28,6 +28,17 @@ public class ResponseApi implements IResponseApi {
 
 
 	@Override
+	public void notifyHandshake(Channel recipient) {
+		IResponse response = new Response();
+		response.setId(SystemRequest.Handshake.getId());
+		response.setTargetController(DefaultConstants.CORE_SYSTEM_CONTROLLER_ID);
+		response.setContent(new QAntObject());
+		response.setRecipients(recipient);
+		response.write();
+	}
+
+
+	@Override
 	public void notifyRequestError(QAntException error, QAntUser recipient, SystemRequest requestType) {
 		notifyRequestError(error.getErrorData(), recipient, requestType);
 	}
@@ -37,7 +48,7 @@ public class ResponseApi implements IResponseApi {
 	public void notifyRequestError(QAntErrorData errData, QAntUser recipient, SystemRequest requestType) {
 		if (recipient != null) {
 			IQAntObject resObj = QAntObject.newInstance();
-			IResponse response = (IResponse) new Response();
+			IResponse response = new Response();
 			response.setId(requestType.getId());
 			response.setContent(resObj);
 			response.setRecipients(recipient.getChannel());
@@ -54,9 +65,9 @@ public class ResponseApi implements IResponseApi {
 	@Override
 	public void notifyJoinRoomSuccess(QAntUser recipient, Room joinedRoom) {
 		IQAntObject resObj = QAntObject.newInstance();
-		IResponse response = (IResponse) new Response();
+		IResponse response = new Response();
 		response.setTargetController(DefaultConstants.CORE_SYSTEM_CONTROLLER_ID);
-		response.setId((short) SystemRequest.JoinRoom.getId());
+		response.setId(SystemRequest.JoinRoom.getId());
 		response.setContent(resObj);
 		response.setRecipients(recipient.getChannel());
 		resObj.putQAntArray("r", joinedRoom.toQAntArray(false));
@@ -73,9 +84,9 @@ public class ResponseApi implements IResponseApi {
 			resObj.putInt("r", room.getId());
 		}
 
-		IResponse response = (IResponse) new Response();
+		IResponse response = new Response();
 		response.setId(SystemRequest.CallExtension.getId());
-		response.setTargetController((byte) 1);
+		response.setTargetController(DefaultConstants.CORE_EXTENSIONS_CONTROLLER_ID);
 		response.setContent(resObj);
 		response.setRecipients(Recipient);
 		response.write();
@@ -84,9 +95,9 @@ public class ResponseApi implements IResponseApi {
 
 	@Override
 	public void sendPingPongResponse(Channel recipient) {
-		IResponse response = (IResponse) new Response();
+		IResponse response = new Response();
 		response.setId(SystemRequest.PingPong.getId());
-		response.setTargetController((byte) 0);
+		response.setTargetController(DefaultConstants.CORE_SYSTEM_CONTROLLER_ID);
 		response.setContent(new QAntObject());
 		response.setRecipients(recipient);
 		response.write();
@@ -106,7 +117,7 @@ public class ResponseApi implements IResponseApi {
 			recipients.addAll(room.getChannelList());
 		}
 		IQAntObject resObj = QAntObject.newInstance();
-		IResponse response = (IResponse) new Response();
+		IResponse response = new Response();
 		response.setId(SystemRequest.OnUserExitRoom.getId());
 		response.setContent(resObj);
 		response.setRecipients(recipients);
@@ -132,8 +143,14 @@ public class ResponseApi implements IResponseApi {
 
 	@Override
 	public void notifyLogout(Channel channel, String zoneName) {
-		// TODO Auto-generated method stub
-
+		IQAntObject resObj = QAntObject.newInstance();
+		resObj.putUtfString("zn", zoneName);
+		final IResponse response = (IResponse) new Response();
+		response.setId(SystemRequest.Logout.getId());
+		response.setTargetController(DefaultConstants.CORE_SYSTEM_CONTROLLER_ID);
+		response.setContent(resObj);
+		response.setRecipients(channel);
+		response.write();
 	}
 
 }

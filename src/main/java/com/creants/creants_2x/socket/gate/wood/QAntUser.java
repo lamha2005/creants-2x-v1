@@ -1,8 +1,10 @@
 package com.creants.creants_2x.socket.gate.wood;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -36,6 +38,7 @@ public class QAntUser implements IQAntUser {
 	private byte currentGameId = -1;
 	private Channel channel;
 	private final LinkedList<Room> joinedRooms;
+	private final Set<Room> createdRooms;
 	private boolean isConnected;
 	private final ConcurrentMap<Object, Object> properties;
 	private Zone currentZone;
@@ -49,6 +52,7 @@ public class QAntUser implements IQAntUser {
 	public QAntUser(String name, Channel channel) {
 		userId = QAntServer.getInstance().getUIDGenerator().generateID();
 		joinedRooms = new LinkedList<Room>();
+		createdRooms = new HashSet<Room>();
 		this.channel = channel;
 		this.name = name;
 		this.properties = new ConcurrentHashMap<Object, Object>();
@@ -93,7 +97,11 @@ public class QAntUser implements IQAntUser {
 
 
 	public List<Room> getCreatedRooms() {
-		return null;
+		List<Room> rooms = null;
+        synchronized (this.createdRooms) {
+            rooms = new LinkedList<Room>(this.createdRooms);
+        }
+        return rooms;
 	}
 
 

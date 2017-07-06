@@ -48,6 +48,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<IQAntObject> {
 	public void channelActive(final ChannelHandlerContext ctx) throws Exception {
 		synchronized (nextSessionId) {
 			DefaultChannelManager.getInstance().addChannel(ctx.channel());
+			qantApi.getResponseAPI().notifyHandshake(ctx.channel());
 		}
 
 	}

@@ -25,6 +25,9 @@ public interface IResponseApi {
 	void notifyRoomAdded(Room room);
 
 
+	void notifyHandshake(Channel channel);
+
+
 	void notifyRequestError(QAntErrorData error, QAntUser receiver, SystemRequest request);
 
 

@@ -25,13 +25,14 @@ public class Login extends BaseControllerCommand {
 	private static final String ZONE_NAME = "zid";
 	private static final String REQUEST_LOGIN_DATA_OUT = "$FS_REQUEST_LOGIN_DATA_OUT";
 
+
 	public Login() {
 		super(SystemRequest.Login);
 	}
 
+
 	@Override
 	public void execute(IRequest request) throws Exception {
-		System.out.println("************** execute system login");
 		IQAntObject reqObj = request.getContent();
 		String token = reqObj.getUtfString(TOKEN);
 		String zoneName = reqObj.getUtfString(ZONE_NAME);
@@ -41,6 +42,7 @@ public class Login extends BaseControllerCommand {
 		IQAntObject params = (IQAntObject) request.getAttribute(REQUEST_LOGIN_DATA_OUT);
 		api.login(request.getSender(), token, zoneName, params);
 	}
+
 
 	@Override
 	public boolean validate(IRequest request) throws Exception {
@@ -54,6 +56,7 @@ public class Login extends BaseControllerCommand {
 		Zone zone = qant.getZoneManager().getZoneByName(zoneName);
 		return customLogin(params, request, zone);
 	}
+
 
 	protected boolean customLogin(IQAntObject param, IRequest request, Zone zone)
 			throws QAntRequestValidationException {
@@ -83,6 +86,7 @@ public class Login extends BaseControllerCommand {
 		}
 		return res;
 	}
+
 
 	@Override
 	public Object preProcess(IRequest request) throws Exception {
