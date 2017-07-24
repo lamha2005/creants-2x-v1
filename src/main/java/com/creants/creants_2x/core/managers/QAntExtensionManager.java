@@ -48,6 +48,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 	private IQAntEventManager eventManager;
 	private boolean inited;
 
+
 	public QAntExtensionManager() {
 		inited = false;
 		extensionsByZone = new ConcurrentHashMap<Zone, IQAntExtension>();
@@ -55,6 +56,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		listenersByRoom = new ConcurrentHashMap<Room, Map<QAntEventType, Set<IQAntEventListener>>>();
 		listenersByZone = new ConcurrentHashMap<Zone, Map<QAntEventType, Set<IQAntEventListener>>>();
 	}
+
 
 	@Override
 	public void createExtension(ExtensionSettings settings, ExtensionLevel extLevel, Zone parentZone, Room parentRoom)
@@ -113,9 +115,11 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 				parentZone.setExtension(extension);
 			}
 		} catch (Exception err) {
+			err.printStackTrace();
 			QAntTracer.error(this.getClass(), "Extension initialization failed.");
 		}
 	}
+
 
 	private IQAntExtension createJavaExtension(ZoneSettings.ExtensionSettings settings) throws QAntExtensionException {
 		IQAntExtension extension;
@@ -136,6 +140,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 
 		return extension;
 	}
+
 
 	@Override
 	public void destroyExtension(IQAntExtension extension) {
@@ -158,6 +163,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		QAntTracer.debug(this.getClass(), "Removed: " + extension);
 	}
 
+
 	@Override
 	public void addExtension(IQAntExtension extension) {
 		if (extension.getLevel() == ExtensionLevel.ZONE) {
@@ -167,20 +173,24 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		}
 	}
 
+
 	@Override
 	public IQAntExtension getRoomExtension(Room room) {
 		return extensionsByRoom.get(room);
 	}
+
 
 	@Override
 	public IQAntExtension getZoneExtension(Zone zone) {
 		return extensionsByZone.get(zone);
 	}
 
+
 	@Override
 	public int getExtensionsCount() {
 		return extensionsByRoom.size() + extensionsByZone.size();
 	}
+
 
 	@Override
 	public List<IQAntExtension> getExtensions() {
@@ -188,6 +198,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		allOfThem.addAll(extensionsByZone.values());
 		return allOfThem;
 	}
+
 
 	@Override
 	public void init() {
@@ -203,6 +214,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 			QAntTracer.debug(this.getClass(), "Extension Manager started.");
 		}
 	}
+
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -249,10 +261,12 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		}
 	}
 
+
 	private void dispatchRoomLevelEvent(IQAntEvent event) {
 		Room room = (Room) event.getParameter(QAntEventParam.ROOM);
 		dispatchRoomLevelEvent(event, room);
 	}
+
 
 	private void dispatchRoomLevelEvent(IQAntEvent event, Room room) {
 		if (room != null) {
@@ -265,6 +279,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 			QAntTracer.info(this.getClass(), "Room Event was not dispatched. ROOM param is null: " + event);
 		}
 	}
+
 
 	private void dispatchRoomLevelEvent(IQAntEvent event, List<Room> roomList) {
 		if (roomList != null) {
@@ -280,6 +295,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		}
 	}
 
+
 	private void dispatchZoneLevelEvent(IQAntEvent event) {
 		Zone zone = (Zone) event.getParameter(QAntEventParam.ZONE);
 		if (zone != null) {
@@ -292,6 +308,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 			QAntTracer.info(this.getClass(), "Zone Event was not dispatched. ZONE param is null: " + event);
 		}
 	}
+
 
 	@Override
 	public void destroy() {
@@ -314,11 +331,13 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		QAntTracer.debug(this.getClass(), "Extension Manager stopped.");
 	}
 
+
 	@Override
 	public void activateAllExtensions() {
 		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void deactivateAllExtensions() {
@@ -326,11 +345,13 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 
 	}
 
+
 	@Override
 	public void reloadExtension(IQAntExtension extension) {
 		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void reloadRoomExtension(String extensionName, Room room) {
@@ -338,11 +359,13 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 
 	}
 
+
 	@Override
 	public void reloadZoneExtension(String zoneName, Zone zone) {
 		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void addZoneEventListener(QAntEventType type, IQAntEventListener listener, Zone zone) {
@@ -358,6 +381,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		}
 		listeners.add(listener);
 	}
+
 
 	@Override
 	public void addRoomEventListener(QAntEventType eventType, IQAntEventListener listener, Room room) {
@@ -375,6 +399,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		listeners.add(listener);
 	}
 
+
 	@Override
 	public void removeZoneEventListener(QAntEventType type, IQAntEventListener listener, Zone zone) {
 		Map<QAntEventType, Set<IQAntEventListener>> listenersByType = listenersByZone.get(zone);
@@ -391,11 +416,13 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		listeners.add(listener);
 	}
 
+
 	@Override
 	public void removeRoomEventListener(QAntEventType eventType, IQAntEventListener listener, Room room) {
 		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void removeListenerFromZone(IQAntEventListener listener, Zone zone) {
@@ -403,10 +430,12 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 
 	}
 
+
 	@Override
 	public void removeListenerFromRoom(IQAntEventListener listener, Room room) {
 
 	}
+
 
 	@Override
 	public void dispatchEvent(IQAntEvent event, ExtensionLevel level) {
@@ -418,6 +447,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 			dispatchRoomLevelEvent(event);
 		}
 	}
+
 
 	private void dispatchEvent(IQAntEvent event, Collection<IQAntEventListener> listeners) {
 		if (listeners != null && listeners.size() > 0) {
@@ -437,6 +467,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		}
 	}
 
+
 	/**
 	 * Thực thi các custom sự kiện hệ thống
 	 * 
@@ -451,6 +482,7 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 			command.execute(request);
 		}
 	}
+
 
 	private void dispatchGlobalEvent(IQAntEvent event) {
 		List<IQAntEventListener> allListeners = new ArrayList<IQAntEventListener>();
@@ -471,10 +503,12 @@ public class QAntExtensionManager implements IExtensionManager, IQAntEventListen
 		dispatchEvent(event, allListeners);
 	}
 
+
 	@Override
 	public boolean isExtensionMonitorActive() {
 		return false;
 	}
+
 
 	@Override
 	public void setExtensionMonitorActive(boolean isActive) {

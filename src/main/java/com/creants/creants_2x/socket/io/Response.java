@@ -1,10 +1,10 @@
 package com.creants.creants_2x.socket.io;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.creants.creants_2x.core.controllers.SystemRequest;
 import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.gate.entities.IQAntObject;
 import com.creants.creants_2x.socket.gate.entities.QAntObject;
@@ -77,7 +77,9 @@ public class Response extends AbstractEngineMessage implements IResponse {
 			future.addListener(new ChannelFutureListener() {
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
-					QAntTracer.debug(this.getClass(), "- Send:" + packet.getDump());
+					if (getId() != SystemRequest.PingPong.getId()) {
+						QAntTracer.debug(this.getClass(), "- Send:" + packet.getDump());
+					}
 				}
 			});
 		}

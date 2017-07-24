@@ -91,6 +91,7 @@ public class ExtensionController extends AbstractController {
 			e.printStackTrace();
 			QAntTracer.error(this.getClass(), "Error while handling client request in extension: "
 					+ extension.toString() + "/" + "Extension Cmd: " + cmd);
+			QAntTracer.error(this.getClass(), QAntTracer.getTraceMessage(e));
 		}
 
 		long t2 = System.nanoTime();

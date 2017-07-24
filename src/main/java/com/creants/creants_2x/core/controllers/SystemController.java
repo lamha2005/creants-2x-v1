@@ -43,7 +43,9 @@ public class SystemController extends AbstractController {
 
 	@Override
 	public void processRequest(IRequest request) throws Exception {
-		QAntTracer.debug(this.getClass(), "{IN}: " + SystemRequest.fromId(request.getId()).toString());
+		if (request.getId() != SystemRequest.PingPong.getId()) {
+			QAntTracer.debug(this.getClass(), "{IN}: " + SystemRequest.fromId(request.getId()).toString());
+		}
 		IControllerCommand command = null;
 		Object reqId = request.getId();
 		command = commandCache.get(reqId);
