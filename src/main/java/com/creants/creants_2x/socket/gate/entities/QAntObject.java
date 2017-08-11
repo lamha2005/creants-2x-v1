@@ -98,7 +98,7 @@ public class QAntObject implements IQAntObject {
 	@Override
 	public String getDump() {
 		if (size() == 0) {
-			return "[ Empty CASObject ]";
+			return "[ Empty QAntObject ]";
 		}
 		return DefaultObjectDumpFormatter.prettyPrintDump(dump());
 	}
@@ -114,10 +114,10 @@ public class QAntObject implements IQAntObject {
 
 
 	private String dump() {
-		final StringBuilder buffer = new StringBuilder();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append('{');
-		for (final String key : getKeys()) {
-			final QAntDataWrapper wrapper = get(key);
+		for (String key : getKeys()) {
+			QAntDataWrapper wrapper = get(key);
 			buffer.append("(").append(wrapper.getTypeId().name().toLowerCase()).append(") ").append(key).append(": ");
 			if (wrapper.getTypeId() == QAntDataType.QANT_OBJECT) {
 				buffer.append(((QAntObject) wrapper.getObject()).getDump(false));

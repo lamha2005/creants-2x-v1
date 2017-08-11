@@ -201,6 +201,7 @@ public class QAntAPI implements IQAntApi {
 		resObj.putShort("ec", errCode.getId());
 		resObj.putUtfString("ep", zoneName);
 		resObj.putUtfString("rs", errCode.getName());
+		response.setContent(resObj);
 		response.write();
 	}
 
