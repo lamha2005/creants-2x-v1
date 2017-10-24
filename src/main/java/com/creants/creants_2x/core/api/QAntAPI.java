@@ -143,8 +143,9 @@ public class QAntAPI implements IQAntApi {
 			verify = WebService.getInstance().verify(token);
 		} catch (Exception e) {
 			sendError(zoneName, response, QAntErrorCode.GRAPH_API_FAIL);
-			QAntTracer.info(this.getClass(), "Bad login request, Zone: " + zoneName + ", reason:"
-					+ QAntErrorCode.GRAPH_API_FAIL.getName() + ". Requested by: " + sender);
+			QAntTracer.error(this.getClass(),
+					"Bad login request, Zone: " + zoneName + ", reason:" + QAntErrorCode.GRAPH_API_FAIL.getName()
+							+ ". Requested by: " + sender + "\n" + QAntTracer.getTraceMessage(e));
 			return null;
 		}
 
@@ -187,6 +188,7 @@ public class QAntAPI implements IQAntApi {
 		resObj.putQAntObject("p", outParams);
 		response.write();
 		user.setAvatar(userInfo.getString("avatar"));
+		user.setFullName(userInfo.getString("fullName"));
 
 		Map<IQAntEventParam, Object> evtParams = new HashMap<IQAntEventParam, Object>();
 		evtParams.put(QAntEventParam.ZONE, zone);

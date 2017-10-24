@@ -121,13 +121,26 @@ public class MessageHandler extends SimpleChannelInboundHandler<IQAntObject> {
 		// ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
 	}
 
+	
+	
+
+	
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		System.out.println("-------------------------- channelInactive -----------------------------");
+		super.channelInactive(ctx);
+	}
+
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		System.out.println("-------------------------- exceptionCaught -----------------------------");
 		cause.printStackTrace();
 		ctx.close();
 	}
 
+	
+	
 
 	@Override
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {

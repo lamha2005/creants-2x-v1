@@ -95,7 +95,8 @@ public class ExtensionController extends AbstractController {
 		}
 
 		long t2 = System.nanoTime();
-		QAntTracer.debug(this.getClass(), "Extension call executed in: " + (t2 - t1) / 1000000 + " milisecond");
+		QAntTracer.debug(this.getClass(),
+				"Extension call <" + cmd + ">  executed in: " + (t2 - t1) / 1000000 + " milisecond");
 	}
 
 }

@@ -61,7 +61,7 @@ public class WebService {
 
 
 	public static void main(String[] args) {
-		String user = WebService.getInstance().verify("eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjI4NiIsImV4cCI6MTQ5Mzk3OTE1NSwiaXNzIjoiYXV0aDAiLCJ0dGwiOjg2NDAwMDAwMH0.o_IRbuqVe1MkJQ0GjB_Xmoch1x12_vc1i2fltlTTNC4");
+		String user = WebService.getInstance().verify("eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhdXRoMCIsImlkIjoiMzIzIiwiZXhwIjoxNTA2MzExOTc2LCJhcHBfaWQiOiIyIiwidHRsIjo4NjQwMDAwMDB9.fkpS0atvhvHu_OAA-V6ZQqxsZ1Ekgs5-E3W7ANGi89U");
 		System.out.println(user.toString());
 	}
 }

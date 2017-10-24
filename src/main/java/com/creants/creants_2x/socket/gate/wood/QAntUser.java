@@ -29,6 +29,7 @@ public class QAntUser implements IQAntUser {
 	private long creantsUserId;
 	private long createTime;
 	private String name;
+	private String fullName;
 	private long money;
 	private String avatar;
 	private byte language;
@@ -98,10 +99,10 @@ public class QAntUser implements IQAntUser {
 
 	public List<Room> getCreatedRooms() {
 		List<Room> rooms = null;
-        synchronized (this.createdRooms) {
-            rooms = new LinkedList<Room>(this.createdRooms);
-        }
-        return rooms;
+		synchronized (this.createdRooms) {
+			rooms = new LinkedList<Room>(this.createdRooms);
+		}
+		return rooms;
 	}
 
 
@@ -147,6 +148,16 @@ public class QAntUser implements IQAntUser {
 
 	public void setCreantsUserId(long creantsUserId) {
 		this.creantsUserId = creantsUserId;
+	}
+
+
+	public String getFullName() {
+		return fullName;
+	}
+
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
 
 

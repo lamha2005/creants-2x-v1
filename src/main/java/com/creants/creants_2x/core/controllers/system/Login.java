@@ -12,6 +12,7 @@ import com.creants.creants_2x.core.controllers.BaseControllerCommand;
 import com.creants.creants_2x.core.controllers.SystemRequest;
 import com.creants.creants_2x.core.entities.Zone;
 import com.creants.creants_2x.core.exception.QAntRequestValidationException;
+import com.creants.creants_2x.core.util.QAntTracer;
 import com.creants.creants_2x.socket.gate.entities.IQAntObject;
 import com.creants.creants_2x.socket.gate.entities.QAntObject;
 import com.creants.creants_2x.socket.io.IRequest;
@@ -36,8 +37,10 @@ public class Login extends BaseControllerCommand {
 		IQAntObject reqObj = request.getContent();
 		String token = reqObj.getUtfString(TOKEN);
 		String zoneName = reqObj.getUtfString(ZONE_NAME);
-		if (zoneName == null)
+		if (zoneName == null) {
 			zoneName = "mus1";
+			QAntTracer.warn(this.getClass(), "required zone name. token=" + token);
+		}
 
 		IQAntObject params = (IQAntObject) request.getAttribute(REQUEST_LOGIN_DATA_OUT);
 		api.login(request.getSender(), token, zoneName, params);

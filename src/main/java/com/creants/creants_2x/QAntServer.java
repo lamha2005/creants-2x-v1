@@ -132,6 +132,7 @@ public class QAntServer {
 								future.cause().toString());
 					}
 				}
+
 			});
 
 			QAntTracer.debug(this.getClass(),
@@ -177,7 +178,6 @@ public class QAntServer {
 						new WebsocketDecoder(), new WebsocketEncoder());
 				ch.pipeline().addLast(new HttpRequestHandler("/ws"), new WebSocketServerProtocolHandler("/ws"),
 						messageHandler);
-
 			}
 
 		};
